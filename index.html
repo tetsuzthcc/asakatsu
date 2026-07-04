@@ -109,7 +109,7 @@
   .chip{
     border:1px solid var(--line);background:var(--bg2);color:var(--white);
     border-radius:999px;padding:10px 15px;font-size:14px;font-weight:700;cursor:pointer;
-    user-select:none;transition:.12s;display:flex;align-items:center;gap:6px;line-height:1;
+    user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;transition:.12s;display:flex;align-items:center;gap:6px;line-height:1;
   }
   .chip:active{transform:scale(.95)}
   .chip.on{background:var(--teal);color:#062b25;border-color:var(--teal);box-shadow:0 0 0 3px rgba(25,227,196,.15)}
@@ -444,8 +444,9 @@
 <div class="share-ov" id="memberOv">
   <div class="share-box" style="width:min(340px,92vw)">
     <div style="font-weight:900;font-size:19px;margin-bottom:12px;text-align:center" id="memberOvName">—</div>
+    <input type="text" id="mvNameInput" placeholder="名前" style="margin-bottom:10px">
     <div class="share-btns">
-      <button class="cta teal" id="mvRename"><span>✏️ 名前を修正</span></button>
+      <button class="cta teal" id="mvRename"><span>✏️ この名前に修正</span></button>
       <button class="cta ghost" id="mvJanken"><span>♀/子（じゃんけん除外）を切替</span></button>
       <button class="cta ghost" id="mvDelete"><span>🗑 メンバーを削除</span></button>
       <button class="cta ghost" id="mvClose"><span>✕ 閉じる</span></button>
@@ -652,6 +653,10 @@
     const date = editingDate || document.getElementById("sesDate").value || todayStr();
     const time = document.getElementById("sesTime").value || "05:30";
     if(attArr.length===0){ toast("参加メンバーを選んでください",'r'); return; }
+    if(!editingDate && sessions.some(s=>s.date===date)){
+      const dd=parseD(date);
+      if(!confirm((dd.getMonth()+1)+"/"+dd.getDate()+" には既に記録があります。上書きしますか？")) return;
+    }
     const amount = parseInt(document.getElementById("treatAmount").value,10) || 0;
     const hasWinner = winnerId && jankenArr.includes(winnerId);
     const rec={
@@ -696,14 +701,26 @@
     freeEntry=true; resetForm(); renderRecordState();
     toast("日付を選んでください📅 記録がある日は自動で呼び出します");
   };
+  function showNewBanner(date){
+    const b=document.getElementById("editBanner"); const d=parseD(date);
+    b.style.display="block";
+    b.textContent="🆕 "+(d.getMonth()+1)+"/"+d.getDate()+" ("+WD[d.getDay()]+") の記録を入力中";
+  }
+  function updateSaveLabel(){
+    const date=editingDate||document.getElementById("sesDate").value||todayStr();
+    const btn=document.getElementById("saveBtn"); const d=parseD(date);
+    btn.innerHTML="<span>▶ "+(date===todayStr()?"記録する":(d.getMonth()+1)+"/"+d.getDate()+" の記録を保存")+"</span>";
+  }
   document.getElementById("sesDate").onchange=function(){
     const v=this.value; if(!v) return;
     const s=sessions.find(x=>x.date===v);
     if(s){ startEdit(v); }
-    else if(editingDate){
-      // 編集中に未記録の日へ変えたら、新規入力に切り替え（入力内容は保持）
-      editingDate=null; freeEntry=true;
-      document.getElementById("editBanner").style.display="none";
+    else{
+      // 未記録の日 → 新規入力モード（入力内容は保持）
+      if(editingDate) editingDate=null;
+      if(v!==todayStr()){ freeEntry=true; showNewBanner(v); }
+      else document.getElementById("editBanner").style.display="none";
+      updateSaveLabel();
     }
   };
 
@@ -717,6 +734,7 @@
     document.getElementById("geoBtn").textContent="📍 位置を記録（任意）";
     document.getElementById("editBanner").style.display="none";
     document.getElementById("addMemberBox").style.display="none";
+    updateSaveLabel();
   }
   let freeEntry=false;
   function renderRecordState(){
@@ -742,6 +760,7 @@
     const d=parseD(date); b.textContent="✏️ "+(d.getMonth()+1)+"/"+d.getDate()+" ("+WD[d.getDay()]+") を編集中";
     document.getElementById("doneState").style.display="none";
     document.getElementById("formArea").style.display="block";
+    updateSaveLabel();
     renderMenu(); renderAtt(); renderJankenPart(); renderWinner();
     switchTab('log');
     document.getElementById("recordCard").scrollIntoView({behavior:"smooth"});
@@ -859,14 +878,17 @@
     const m=roster.find(x=>x.id===id); if(!m) return;
     editMemberId=id;
     document.getElementById("memberOvName").textContent=m.name+(m.janken===false?"（♀/子）":"");
+    document.getElementById("mvNameInput").value=m.name;
     document.getElementById("memberOv").classList.add("show");
   }
   function closeMemberEdit(){ document.getElementById("memberOv").classList.remove("show"); editMemberId=null; }
   document.getElementById("mvClose").onclick=closeMemberEdit;
+  document.getElementById("memberOv").onclick=function(e){ if(e&&e.target===this) closeMemberEdit(); };
+  document.getElementById("shareOv").onclick=function(e){ if(e&&e.target===this) this.classList.remove("show"); };
   document.getElementById("mvRename").onclick=()=>{
     const m=roster.find(x=>x.id===editMemberId); if(!m){ closeMemberEdit(); return; }
-    const nn=prompt("名前を修正", m.name);
-    if(nn&&nn.trim()){ m.name=nn.trim(); jsave(RKEY,roster); refreshAll(); toast("名前を修正しました✏️",'t'); }
+    const nn=document.getElementById("mvNameInput").value;
+    if(nn&&nn.trim()&&nn.trim()!==m.name){ m.name=nn.trim(); jsave(RKEY,roster); refreshAll(); toast("名前を修正しました✏️",'t'); }
     closeMemberEdit();
   };
   document.getElementById("mvJanken").onclick=()=>{
