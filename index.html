@@ -131,9 +131,9 @@
   .quick-btn:active{background:var(--panel2)}
   .quick-btn.tealtxt{color:var(--teal)}
 
-  /* yen */
+  /* baht */
   .yen-wrap{position:relative}
-  .yen-wrap::before{content:"¥";position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--red);font-weight:900;font-size:18px}
+  .yen-wrap::before{content:"฿";position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--red);font-weight:900;font-size:18px}
   .yen-wrap input{padding-left:30px;font-weight:800}
 
   /* record button */
@@ -259,7 +259,7 @@
           <div class="kanji">朝活記録<span class="dot">。</span></div>
           <div class="romaji">Asakatsu Log</div>
         </div>
-        <div class="subjp">覚悟の量が力を上げる<span class="dot">。</span></div>
+        <div class="subjp">Bangkok Morning Club<span class="dot">。</span></div>
       </div>
       <div class="streak-badge">
         <div><span class="n" id="streakN">0</span></div>
@@ -316,7 +316,7 @@
         <label class="fld">🏆 勝者（奢る人）</label>
         <div class="chips" id="winnerChips"></div>
         <div class="row2" style="margin-top:12px">
-          <div class="yen-wrap" style="flex:2"><input type="number" id="treatAmount" placeholder="奢り額" inputmode="numeric"></div>
+          <div class="yen-wrap" style="flex:2"><input type="number" id="treatAmount" placeholder="奢り額（฿）" inputmode="numeric"></div>
           <button class="quick-btn" id="noJanken" style="flex:1">奢りなし</button>
         </div>
 
@@ -337,6 +337,7 @@
       <div class="done-state" id="doneState" style="display:none">
         <div class="big">DONE<span class="dot">.</span></div>
         <div class="jp">今朝の記録は完了。お疲れさまでした。</div>
+        <button class="cta" id="sendTodayBtn" style="margin-bottom:10px"><span>📣 Discordに送る</span></button>
         <button class="cta" id="shareTodayBtn" style="margin-bottom:10px"><span>📸 シェア画像を作る</span></button>
         <button class="cta ghost" id="editTodayBtn" style="margin-bottom:10px"><span>今朝の記録を編集</span></button>
         <button class="cta ghost" id="otherDayBtn"><span>📅 別の日を記録・編集</span></button>
@@ -356,7 +357,7 @@
     <div class="tiles">
       <div class="tile"><span class="n t" id="stSessions">0</span><div class="l">Sessions</div></div>
       <div class="tile"><span class="n" id="stAttend">0</span><div class="l">のべ参加</div></div>
-      <div class="tile"><span class="n r" id="stTreat">¥0</span><div class="l">奢り総額</div></div>
+      <div class="tile"><span class="n r" id="stTreat">฿0</span><div class="l">奢り総額</div></div>
     </div>
 
     <div class="card">
@@ -494,7 +495,7 @@
   function todayStr(){ const d=new Date(); return ymd(d); }
   function ymd(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
   function parseD(s){ const p=s.split("-"); return new Date(+p[0],+p[1]-1,+p[2]); }
-  function yen(n){ return "¥"+(n||0).toLocaleString("ja-JP"); }
+  function yen(n){ return "฿"+(n||0).toLocaleString("en-US"); }
   function esc(s){ return (s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
   function memberName(id){ const m=roster.find(x=>x.id===id); return m?m.name:"（不明）"; }
   function effWebhook(){ return (config.webhook||"").trim() || BUILTIN_WEBHOOK; }
@@ -518,6 +519,12 @@
     document.getElementById("hdrDate").textContent=(d.getMonth()+1)+"/"+d.getDate()+" "+WD[d.getDay()];
     document.getElementById("hdrTime").innerHTML=(config.defaultTime||"05:30")+"<small> START</small>";
     document.getElementById("streakN").textContent=calcStreak();
+  }
+  function streakAt(dateStr){
+    const set=new Set(sessions.map(s=>s.date));
+    let n=0, cur=parseD(dateStr);
+    while(set.has(ymd(cur))){ n++; cur.setDate(cur.getDate()-1); }
+    return n;
   }
   function calcStreak(){
     const set=new Set(sessions.map(s=>s.date));
@@ -654,6 +661,16 @@
   };
 
   document.getElementById("editTodayBtn").onclick=()=> startEdit(todayStr());
+  document.getElementById("sendTodayBtn").onclick=function(){
+    const rec=sessions.find(s=>s.date===todayStr());
+    if(!rec){ toast("今日の記録がありません",'r'); return; }
+    if(!effWebhook()){ toast("Webhook未設定。設定タブを確認",'r'); switchTab('config'); return; }
+    const btn=this; btn.disabled=true;
+    sendDiscord(buildMessage(rec))
+      .then(()=>toast("Discordに投稿しました📣",'t'))
+      .catch(()=>toast("投稿失敗⚠️ 通信・設定を確認",'r'))
+      .finally(()=>{ btn.disabled=false; });
+  };
   document.getElementById("otherDayBtn").onclick=()=>{
     freeEntry=true; resetForm(); renderRecordState();
     toast("日付を選んでください📅 記録がある日は自動で呼び出します");
@@ -756,10 +773,17 @@
         "<div class='hist-body'><div class='hist-top'>"+s.attendees.length+"名参加 <span style='font-weight:400'>"+ph+"</span></div>"+
           "<div class='hist-att'>"+esc(names)+"</div>"+treat+
           (s.note?"<div class='hist-att'>📝 "+esc(s.note)+"</div>":"")+"</div>"+
-        "<div class='hist-acts'><button data-s='"+s.date+"'>📸</button><button class='e' data-e='"+s.date+"'>✏️</button><button data-x='"+s.date+"'>✕</button></div>";
+        "<div class='hist-acts'><button data-p='"+s.date+"'>📣</button><button data-s='"+s.date+"'>📸</button><button class='e' data-e='"+s.date+"'>✏️</button><button data-x='"+s.date+"'>✕</button></div>";
       c.appendChild(el);
     });
     c.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>openShare(b.getAttribute("data-s")));
+    c.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{
+      const date=b.getAttribute("data-p"); const rec=sessions.find(x=>x.date===date);
+      if(!rec) return;
+      if(!effWebhook()){ toast("Webhook未設定。設定タブを確認",'r'); return; }
+      if(!confirm(date+" の記録をDiscordに投稿しますか？")) return;
+      sendDiscord(buildMessage(rec)).then(()=>toast("Discordに投稿しました📣",'t')).catch(()=>toast("投稿失敗⚠️",'r'));
+    });
     c.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>startEdit(b.getAttribute("data-e")));
     c.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{
       const date=b.getAttribute("data-x");
@@ -814,7 +838,7 @@
     const names=rec.attendees.map(memberName);
     const lines=[];
     lines.push("🌅 **朝活 RHIR** "+d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate()+" ("+WD[d.getDay()]+") "+(rec.time||"05:30")+" START");
-    lines.push("🔥 連続"+calcStreak()+"日目"+(config.host?"｜主催 "+config.host:""));
+    lines.push("🔥 連続"+streakAt(rec.date)+"日目"+(config.host?"｜主催 "+config.host:""));
     const menu=(rec.phases||["run","hiit","ice"]).map(k=>{const x=MENU.find(m=>m.k===k);return x?x.e+" "+x.l:"";}).filter(Boolean);
     if(menu.length) lines.push("🔁 "+menu.join(" → ")+" → REPEAT");
     lines.push("");
@@ -1012,7 +1036,7 @@
   document.getElementById("testDiscord").onclick=()=>{
     config.webhook=document.getElementById("cfgWebhook").value.trim(); jsave(CKEY,config);
     if(!effWebhook()){ toast("Webhook URLを入力してください",'r'); return; }
-    sendDiscord("✅ テスト送信：RHIR 朝活ログと接続できました🌅 覚悟の量が力を上げる。— Thcc.")
+    sendDiscord("✅ テスト送信：RHIR 朝活ログと接続できました🌅 — Thcc.")
       .then(()=>toast("送信成功！Discordを確認🎉",'t')).catch(()=>toast("送信失敗⚠️ URLを確認",'r'));
   };
 
