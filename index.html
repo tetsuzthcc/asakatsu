@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>RHIR — 朝活ログ / Thcc.</title>
+<!-- PWA: ホーム画面に追加でアプリとして起動 -->
+<meta name="theme-color" content="#0a0b0d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="朝活記録">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,800;0,900;1,800;1,900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0b0d;
+    --bg2:#101216;
+    --panel:#15181d;
+    --panel2:#1b1f26;
+    --line:#262b33;
+    --teal:#19e3c4;
+    --teal-dim:#0e8f7c;
+    --red:#ff3a1f;
+    --red-dim:#b52412;
+    --white:#f4f6f7;
+    --muted:#7b828c;
+    --muted2:#565d67;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{background:var(--bg);color:var(--white)}
+  body{
+    font-family:"Helvetica Neue",Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+    min-height:100vh;padding-bottom:86px;overflow-x:hidden;
+    background:
+      radial-gradient(1200px 400px at 80% -10%, rgba(25,227,196,.06), transparent 60%),
+      radial-gradient(900px 400px at -10% 20%, rgba(255,58,31,.06), transparent 60%),
+      var(--bg);
+  }
+  .disp{
+    font-family:"Anton","Arial Narrow","Helvetica Neue",Impact,sans-serif;
+    text-transform:uppercase;letter-spacing:.01em;transform:skewX(-8deg);
+    font-weight:400;line-height:.92;
+  }
+  .wrap{max-width:480px;margin:0 auto;padding:0 16px}
+  .dot{color:var(--red)}
+  .accent-t{color:var(--teal)}
+  .accent-r{color:var(--red)}
+
+  /* header */
+  header{padding:20px 0 10px;position:relative}
+  .brand-row{display:flex;justify-content:space-between;align-items:flex-start}
+  .brand{font-family:"Anton",Impact,sans-serif;transform:skewX(-8deg);font-size:30px;letter-spacing:.02em}
+  .brand .reg{font-size:12px;vertical-align:super;color:var(--muted)}
+  .streak-badge{
+    text-align:right;
+  }
+  .streak-badge .n{font-family:"Anton",Impact,sans-serif;font-size:30px;color:var(--red);transform:skewX(-8deg);display:inline-block;line-height:1}
+  .streak-badge .l{font-size:9px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
+  .tagline{margin-top:8px;font-family:"Anton",Impact,sans-serif;transform:skewX(-8deg);font-size:20px;letter-spacing:.01em;line-height:1}
+  .tagline .s{opacity:.35;margin:0 2px}
+  .subjp{margin-top:10px;font-size:11px;color:var(--muted);letter-spacing:.16em;font-weight:700}
+  /* Hunter×Hunter 風タイトル（漢字＋カタカナ読み＋英字） */
+  .hxh{margin-top:12px;line-height:1}
+  .hxh .yomi{font-size:10px;letter-spacing:.62em;color:var(--teal);font-weight:800;padding-left:.6em;margin-bottom:3px}
+  .hxh .kanji{
+    font-family:"Hiragino Kaku Gothic StdN","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+    font-weight:900;font-size:33px;letter-spacing:.1em;transform:skewX(-7deg);display:inline-block;
+    text-shadow:2px 2px 0 rgba(255,58,31,.28);
+  }
+  .hxh .romaji{font-size:10px;letter-spacing:.32em;color:var(--muted);font-weight:800;text-transform:uppercase;margin-top:5px}
+  .datestrip{
+    margin-top:12px;display:flex;align-items:center;gap:10px;
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:9px 0;
+  }
+  .datestrip .big{font-family:"Anton",Impact,sans-serif;transform:skewX(-8deg);font-size:22px}
+  .datestrip .time{margin-left:auto;color:var(--teal);font-family:"Anton",Impact,sans-serif;transform:skewX(-8deg);font-size:22px}
+  .datestrip .time small{font-size:11px;color:var(--muted);letter-spacing:.1em}
+
+  /* sections/tabs */
+  .tabpage{display:none;padding-top:14px}
+  .tabpage.active{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+  .card.flat{background:transparent;border:none;padding:0}
+  .sec-h{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+  .sec-h .t{font-family:"Anton",Impact,sans-serif;transform:skewX(-8deg);font-size:19px;letter-spacing:.02em}
+  .sec-h .jp{font-size:10px;color:var(--muted);letter-spacing:.14em;margin-left:auto;font-weight:700}
+  .bar{width:4px;height:18px;background:var(--teal);border-radius:2px;transform:skewX(-8deg)}
+  .bar.r{background:var(--red)}
+
+  label.fld{display:block;font-size:10px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;font-weight:800;margin:0 0 8px}
+  input[type=text],input[type=number],input[type=date],input[type=time],textarea{
+    width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:11px;
+    padding:13px;font-size:16px;color:var(--white);font-family:inherit;
+  }
+  input:focus,textarea:focus{outline:none;border-color:var(--teal)}
+  textarea{resize:vertical;min-height:52px}
+  .row2{display:flex;gap:10px}
+  .row2>*{flex:1;min-width:0}
+
+  /* chips */
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{
+    border:1px solid var(--line);background:var(--bg2);color:var(--white);
+    border-radius:999px;padding:10px 15px;font-size:14px;font-weight:700;cursor:pointer;
+    user-select:none;transition:.12s;display:flex;align-items:center;gap:6px;line-height:1;
+  }
+  .chip:active{transform:scale(.95)}
+  .chip.on{background:var(--teal);color:#062b25;border-color:var(--teal);box-shadow:0 0 0 3px rgba(25,227,196,.15)}
+  .chip.winner{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 0 0 3px rgba(255,58,31,.18)}
+  .chip.add{border-style:dashed;color:var(--teal);border-color:var(--teal-dim)}
+  .chip .cnt{font-size:10px;opacity:.6;font-weight:800}
+  .hint{font-size:12px;color:var(--muted);line-height:1.6}
+  .mini{font-size:11px;color:var(--muted2);margin-top:8px;letter-spacing:.04em}
+  .chk-inline{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:var(--white);background:var(--bg2);border:1px solid var(--line);border-radius:11px;padding:12px 13px;flex:1;cursor:pointer;user-select:none}
+  .chk-inline input{width:17px;height:17px;accent-color:var(--teal)}
+  .flow{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);letter-spacing:.1em;margin:2px 0 10px;font-weight:800}
+  .flow .a{color:var(--muted2)}
+
+  .quick-row{display:flex;gap:8px;margin-bottom:12px}
+  .quick-btn{
+    flex:1;border:1px solid var(--line);background:var(--bg2);color:var(--white);
+    border-radius:11px;padding:11px 8px;font-size:12px;font-weight:800;cursor:pointer;text-align:center;
+  }
+  .quick-btn:active{background:var(--panel2)}
+  .quick-btn.tealtxt{color:var(--teal)}
+
+  /* yen */
+  .yen-wrap{position:relative}
+  .yen-wrap::before{content:"¥";position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--red);font-weight:900;font-size:18px}
+  .yen-wrap input{padding-left:30px;font-weight:800}
+
+  /* record button */
+  .cta{
+    width:100%;border:none;border-radius:14px;padding:18px;cursor:pointer;
+    font-family:"Anton",Impact,sans-serif;transform:skewX(-8deg);font-size:22px;letter-spacing:.03em;
+    background:var(--red);color:#fff;box-shadow:0 8px 24px rgba(255,58,31,.28);text-transform:uppercase;
+  }
+  .cta>span{display:inline-block;transform:skewX(8deg)}
+  .cta:active{transform:skewX(-8deg) scale(.98)}
+  .cta.teal{background:var(--teal);color:#062b25;box-shadow:0 8px 24px rgba(25,227,196,.25)}
+  .cta.ghost{background:transparent;color:var(--white);border:1px solid var(--line);box-shadow:none}
+
+  .done-state{text-align:center;padding:10px 0}
+  .done-state .big{font-family:"Anton",Impact,sans-serif;transform:skewX(-8deg);font-size:26px;color:var(--teal)}
+  .done-state .jp{color:var(--muted);font-size:12px;margin:6px 0 14px;letter-spacing:.1em}
+
+  .editing-banner{background:rgba(25,227,196,.1);border:1px solid var(--teal-dim);color:var(--teal);
+    border-radius:10px;padding:9px 12px;font-size:12px;font-weight:800;margin-bottom:12px;letter-spacing:.05em}
+
+  /* stat tiles */
+  .tiles{display:flex;gap:10px;margin-bottom:14px}
+  .tile{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 10px;text-align:center}
+  .tile .n{font-family:"Anton",Impact,sans-serif;transform:skewX(-8deg);font-size:28px;line-height:1;display:inline-block}
+  .tile .n.t{color:var(--teal)} .tile .n.r{color:var(--red)}
+  .tile .l{font-size:9px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-top:7px;font-weight:800}
+
+  .monthnav{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:14px}
+  .monthnav button{background:var(--panel);border:1px solid var(--line);color:var(--white);width:38px;height:38px;border-radius:10px;font-size:18px;cursor:pointer}
+  .monthnav .m{font-family:"Anton",Impact,sans-serif;transform:skewX(-8deg);font-size:20px;min-width:130px;text-align:center}
+
+  /* leaderboard / lists */
+  .lb-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .lb-item:last-child{border-bottom:none}
+  .lb-rank{font-family:"Anton",Impact,sans-serif;transform:skewX(-8deg);font-size:22px;width:30px;text-align:center;color:var(--muted2)}
+  .lb-rank.g1{color:var(--red)} .lb-rank.g2{color:var(--teal)} .lb-rank.g3{color:var(--white)}
+  .lb-body{flex:1;min-width:0}
+  .lb-name{font-weight:800;font-size:15px}
+  .lb-sub{font-size:11px;color:var(--muted);margin-top:2px}
+  .lb-bar{height:6px;background:var(--bg2);border-radius:3px;margin-top:6px;overflow:hidden}
+  .lb-bar>span{display:block;height:100%;background:var(--teal)}
+  .lb-val{font-family:"Anton",Impact,sans-serif;transform:skewX(-8deg);font-size:20px;color:var(--white)}
+  .lb-val.r{color:var(--red)}
+
+  .toggle-row{display:flex;gap:8px;margin-bottom:12px}
+  .toggle-row button{flex:1;background:var(--bg2);border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:9px;font-size:12px;font-weight:800;cursor:pointer;letter-spacing:.04em}
+  .toggle-row button.on{background:var(--white);color:#0a0b0d;border-color:var(--white)}
+
+  /* history */
+  .hist{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}
+  .hist:last-child{border-bottom:none}
+  .hist-date{width:46px;flex-shrink:0;text-align:center}
+  .hist-date .d{font-family:"Anton",Impact,sans-serif;transform:skewX(-8deg);font-size:22px;color:var(--teal)}
+  .hist-date .m{font-size:9px;color:var(--muted)}
+  .hist-body{flex:1;min-width:0}
+  .hist-top{font-size:13px;font-weight:800}
+  .hist-att{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5}
+  .hist-treat{font-size:12px;margin-top:4px}
+  .hist-treat .who{color:var(--red);font-weight:800}
+  .hist-acts{display:flex;flex-direction:column;gap:5px;align-self:flex-start}
+  .hist-acts button{background:none;border:none;cursor:pointer;font-size:13px;padding:2px 4px;color:var(--muted2)}
+  .hist-acts .e{color:var(--teal)}
+
+  .empty{text-align:center;color:var(--muted2);font-size:13px;padding:26px 0;line-height:1.7}
+
+  /* settings */
+  .switch-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--line)}
+  .switch-row:last-of-type{border-bottom:none}
+  .switch-row .lbl{font-size:14px;font-weight:700}
+  .switch-row .sub{font-size:11px;color:var(--muted);margin-top:2px}
+  .sw{position:relative;width:48px;height:28px;flex-shrink:0}
+  .sw input{opacity:0;width:0;height:0}
+  .sw .track{position:absolute;inset:0;background:var(--bg2);border:1px solid var(--line);border-radius:999px;transition:.2s}
+  .sw .knob{position:absolute;top:3px;left:3px;width:22px;height:22px;background:var(--muted);border-radius:50%;transition:.2s}
+  .sw input:checked+.track{background:var(--teal);border-color:var(--teal)}
+  .sw input:checked+.track .knob{left:23px;background:#062b25}
+  .kv{font-size:12px;color:var(--muted);word-break:break-all}
+
+  /* bottom nav */
+  nav{
+    position:fixed;left:0;right:0;bottom:0;z-index:40;
+    background:rgba(12,13,16,.92);backdrop-filter:blur(12px);border-top:1px solid var(--line);
+    display:flex;max-width:480px;margin:0 auto;
+  }
+  nav button{
+    flex:1;background:none;border:none;color:var(--muted2);padding:10px 0 12px;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+  }
+  nav button .ic{font-size:19px;line-height:1}
+  nav button .nl{font-size:9px;letter-spacing:.1em;font-weight:800;text-transform:uppercase}
+  nav button.on{color:var(--white)}
+  nav button.on .ic{filter:drop-shadow(0 0 6px rgba(25,227,196,.5))}
+
+  /* toast */
+  .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(30px);
+    background:var(--white);color:#0a0b0d;padding:13px 22px;border-radius:12px;font-size:14px;font-weight:800;
+    box-shadow:0 10px 30px rgba(0,0,0,.5);opacity:0;transition:.3s;z-index:60;pointer-events:none;max-width:88%;text-align:center}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+  .toast.r{background:var(--red);color:#fff} .toast.t{background:var(--teal);color:#062b25}
+
+  footer{text-align:center;color:var(--muted2);font-size:10px;letter-spacing:.14em;padding:20px 0;text-transform:uppercase}
+  .sr{position:absolute;left:-9999px}
+
+  /* share modal */
+  .share-ov{position:fixed;inset:0;background:rgba(4,5,6,.88);backdrop-filter:blur(6px);z-index:60;display:none;align-items:center;justify-content:center;padding:18px}
+  .share-ov.show{display:flex}
+  .share-box{max-width:420px;width:100%}
+  .share-box img{display:block;width:auto;max-width:100%;max-height:62vh;margin:0 auto 14px;border:1px solid var(--line);border-radius:10px}
+  .share-btns{display:flex;flex-direction:column;gap:8px}
+  .share-btns .cta{font-size:16px;padding:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand-row">
+      <div>
+        <div class="brand">Thcc<span class="dot">.</span><span class="reg">®</span></div>
+        <div class="tagline">RUN<span class="s">/</span><span class="accent-t">HEAT</span><span class="s">/</span><span class="accent-r">ICE</span><span class="s">/</span>REPEAT<span class="dot">.</span></div>
+        <div class="hxh">
+          <div class="yomi">アサカツキロク</div>
+          <div class="kanji">朝活記録<span class="dot">。</span></div>
+          <div class="romaji">Asakatsu Log</div>
+        </div>
+        <div class="subjp">覚悟の量が力を上げる<span class="dot">。</span></div>
+      </div>
+      <div class="streak-badge">
+        <div><span class="n" id="streakN">0</span></div>
+        <div class="l">DAY STREAK</div>
+      </div>
+    </div>
+    <div class="datestrip">
+      <div class="big" id="hdrDate">—</div>
+      <div class="time" id="hdrTime">05:30<small> START</small></div>
+    </div>
+  </header>
+
+  <!-- ===== 記録 TAB ===== -->
+  <section class="tabpage active" id="tab-log">
+
+    <div class="card" id="recordCard">
+      <div class="sec-h"><span class="bar r"></span><span class="t">Session Log</span><span class="jp">今朝のセッション</span></div>
+
+      <div class="editing-banner" id="editBanner" style="display:none"></div>
+
+      <div id="formArea">
+        <div class="row2" style="margin-bottom:14px">
+          <div><label class="fld">Date</label><input type="date" id="sesDate"></div>
+          <div><label class="fld">Start</label><input type="time" id="sesTime" value="05:30"></div>
+        </div>
+
+        <label class="fld">Attendance / 参加メンバー <span id="attCount" class="accent-t"></span></label>
+        <div class="quick-row">
+          <button class="quick-btn tealtxt" id="sameAsLast">↻ 前回と同じ</button>
+          <button class="quick-btn" id="clearAtt">クリア</button>
+        </div>
+        <div class="chips" id="attChips"></div>
+        <div id="addMemberBox" style="display:none;margin-top:10px">
+          <input type="text" id="newMemberName" placeholder="新しい人の名前" style="margin-bottom:8px">
+          <div class="row2">
+            <label class="chk-inline"><input type="checkbox" id="newMemberJanken" checked> 男気じゃんけんに参加</label>
+            <button class="quick-btn tealtxt" id="confirmAddMember" style="flex:0 0 84px">追加</button>
+          </div>
+          <div class="mini">女性・子供など奢り対象外の人はチェックを外して登録<span class="dot">。</span>次回から自動で除外されます。</div>
+        </div>
+
+        <div style="height:18px"></div>
+
+        <label class="fld">🔁 Menu / 今朝のメニュー</label>
+        <div class="flow">RUN<span class="a">→</span>HEAT (HIIT)<span class="a">→</span>ICE<span class="a">→</span>REPEAT</div>
+        <div class="chips" id="menuChips"></div>
+
+        <div style="height:18px"></div>
+
+        <label class="fld">🥊 男気じゃんけん 参加者</label>
+        <div class="chips" id="jankenPartChips"></div>
+
+        <div style="height:14px"></div>
+        <label class="fld">🏆 勝者（奢る人）</label>
+        <div class="chips" id="winnerChips"></div>
+        <div class="row2" style="margin-top:12px">
+          <div class="yen-wrap" style="flex:2"><input type="number" id="treatAmount" placeholder="奢り額" inputmode="numeric"></div>
+          <button class="quick-btn" id="noJanken" style="flex:1">奢りなし</button>
+        </div>
+
+        <div style="height:18px"></div>
+
+        <label class="fld">Note</label>
+        <textarea id="sesNote" placeholder="今朝のひとこと（任意）"></textarea>
+
+        <div class="quick-row" style="margin-top:12px">
+          <button class="quick-btn" id="geoBtn">📍 位置を記録（任意）</button>
+        </div>
+        <div class="mini" id="geoMini"></div>
+
+        <div style="height:14px"></div>
+        <button class="cta" id="saveBtn"><span>▶ 記録する</span></button>
+      </div>
+
+      <div class="done-state" id="doneState" style="display:none">
+        <div class="big">DONE<span class="dot">.</span></div>
+        <div class="jp">今朝の記録は完了。お疲れさまでした。</div>
+        <button class="cta" id="shareTodayBtn" style="margin-bottom:10px"><span>📸 シェア画像を作る</span></button>
+        <button class="cta ghost" id="editTodayBtn" style="margin-bottom:10px"><span>今朝の記録を編集</span></button>
+        <button class="cta ghost" id="otherDayBtn"><span>📅 別の日を記録・編集</span></button>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ===== 統計 TAB ===== -->
+  <section class="tabpage" id="tab-stats">
+    <div class="monthnav">
+      <button id="prevMo">‹</button>
+      <div class="m" id="statMonth">—</div>
+      <button id="nextMo">›</button>
+    </div>
+
+    <div class="tiles">
+      <div class="tile"><span class="n t" id="stSessions">0</span><div class="l">Sessions</div></div>
+      <div class="tile"><span class="n" id="stAttend">0</span><div class="l">のべ参加</div></div>
+      <div class="tile"><span class="n r" id="stTreat">¥0</span><div class="l">奢り総額</div></div>
+    </div>
+
+    <div class="card">
+      <div class="sec-h"><span class="bar r"></span><span class="t">Treat Ranking</span><span class="jp">今月の奢り</span></div>
+      <div id="treatList"></div>
+    </div>
+
+    <div class="card">
+      <div class="sec-h"><span class="bar"></span><span class="t">History</span><span class="jp">記録の履歴</span></div>
+      <div id="histList"></div>
+    </div>
+  </section>
+
+  <!-- ===== メンバー TAB ===== -->
+  <section class="tabpage" id="tab-crew">
+    <div class="card">
+      <div class="sec-h"><span class="bar"></span><span class="t">Add Member</span><span class="jp">メンバー登録</span></div>
+      <div class="row2">
+        <input type="text" id="crewNewName" placeholder="名前を入力" style="flex:3">
+        <button class="quick-btn tealtxt" id="crewAddBtn" style="flex:1">追加</button>
+      </div>
+      <div class="mini">一度来た人は自動でここに残り、次回からタップで選べます。</div>
+    </div>
+
+    <div class="card flat">
+      <div class="sec-h"><span class="bar r"></span><span class="t">The Crew</span><span class="jp" id="crewCount"></span></div>
+      <div class="toggle-row">
+        <button id="sortAtt" class="on">参加回数順</button>
+        <button id="sortTreat">奢り額順</button>
+      </div>
+      <div id="crewList"></div>
+    </div>
+  </section>
+
+  <!-- ===== 設定 TAB ===== -->
+  <section class="tabpage" id="tab-config">
+    <div class="card">
+      <div class="sec-h"><span class="bar"></span><span class="t">Host</span><span class="jp">主催者</span></div>
+      <label class="fld">主催者名</label>
+      <input type="text" id="cfgHost" placeholder="例：てつ">
+    </div>
+
+    <div class="card">
+      <div class="sec-h"><span class="bar r"></span><span class="t">Discord</span><span class="jp">自動投稿</span></div>
+      <div class="switch-row">
+        <div><div class="lbl">記録したら自動投稿</div><div class="sub">記録ボタンで即チャンネルへ</div></div>
+        <label class="sw"><input type="checkbox" id="cfgAuto"><span class="track"><span class="knob"></span></span></label>
+      </div>
+      <label class="fld" style="margin-top:14px">Webhook URL</label>
+      <input type="text" id="cfgWebhook" placeholder="https://discord.com/api/webhooks/...">
+      <div class="hint" style="margin-top:8px">Discordのチャンネル設定 → 連携サービス → ウェブフックを作成 → URLをコピー。<br><span class="accent-t">共有のコツ：</span>後でこのファイルをネットに置くなら、コード先頭の <b>BUILTIN_WEBHOOK</b> に貼れば、URLを配るだけで全員が同じチャンネルに投稿できます（各自設定不要）。</div>
+      <button class="cta ghost" id="testDiscord" style="margin-top:12px;font-size:16px"><span>テスト送信</span></button>
+    </div>
+
+    <div class="card">
+      <div class="sec-h"><span class="bar"></span><span class="t">Backup</span><span class="jp">引き継ぎ・バックアップ</span></div>
+      <div class="hint" style="margin-bottom:12px">不在の日に誰かへ引き継ぐときは「書き出し」でファイルを渡し、相手が「読み込み」すればメンバーと記録がそのまま移ります。</div>
+      <div class="row2">
+        <button class="quick-btn tealtxt" id="exportBtn">↓ 書き出し</button>
+        <button class="quick-btn" id="importBtn">↑ 読み込み</button>
+      </div>
+      <input type="file" id="importFile" accept="application/json" class="sr">
+    </div>
+
+    <div class="card">
+      <div class="sec-h"><span class="bar r"></span><span class="t">Save Config</span></div>
+      <button class="cta teal" id="saveConfig" style="font-size:18px"><span>設定を保存</span></button>
+    </div>
+  </section>
+
+  <footer>RHIR by Thcc<span class="dot">.</span> — Run. Heat. Ice. Repeat.</footer>
+</div>
+
+<nav>
+  <button data-tab="log" class="on"><span class="ic">🔥</span><span class="nl">記録</span></button>
+  <button data-tab="stats"><span class="ic">📊</span><span class="nl">統計</span></button>
+  <button data-tab="crew"><span class="ic">👥</span><span class="nl">メンバー</span></button>
+  <button data-tab="config"><span class="ic">⚙︎</span><span class="nl">設定</span></button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<!-- ===== シェア画像モーダル ===== -->
+<div class="share-ov" id="shareOv">
+  <div class="share-box">
+    <img id="sharePrev" alt="シェア画像プレビュー">
+    <div class="share-btns">
+      <button class="cta teal" id="shareSendBtn"><span>📲 シェアする</span></button>
+      <button class="cta ghost" id="shareDlBtn"><span>↓ 保存</span></button>
+      <button class="cta ghost" id="shareCloseBtn"><span>✕ 閉じる</span></button>
+    </div>
+    <div class="mini" style="text-align:center;margin-top:8px">Instagram / Threads のストーリーや投稿にどうぞ — @thcc.bkk ・ @tetsu.ice</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============================================================
+     CONFIG — 1つのURLで共有したいときは、ここにDiscord Webhook URLを
+     貼ってからファイルをネットに公開してください（各自設定不要になります）
+     例: const BUILTIN_WEBHOOK = "https://discord.com/api/webhooks/xxxx/yyyy";
+     ============================================================ */
+  const BUILTIN_WEBHOOK = "";
+
+  const RKEY="thcc_roster_v1", TKEY="thcc_sessions_v1", CKEY="thcc_config_v1";
+
+  // ---- storage ----
+  function jload(k,f){ try{ return JSON.parse(localStorage.getItem(k)) ?? f; }catch(e){ return f; } }
+  function jsave(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
+  // ---- 初期データ（初回起動時のみ自動投入：5/17〜6/20の記録） ----
+  const SEED = {"roster":[{"id":"m19f2c5442aace286","name":"Nori","janken":true},{"id":"m19f2c5442ab1cf90","name":"Tetsu","janken":true},{"id":"m19f2c5442acc5310","name":"Sato","janken":true},{"id":"m19f2c5442ad159c20","name":"Kurasaka","janken":true},{"id":"m19f2c5442ae17892b","name":"Fukumi","janken":true},{"id":"m19f2c5442af1932e","name":"Kenji","janken":true},{"id":"m19f2c5442b0161efc","name":"Masa","janken":true},{"id":"m19f2c5442b112c96b","name":"Shota","janken":true},{"id":"m19f2c5442b250436","name":"Riko","janken":true},{"id":"m19f2c5442b315a6ff","name":"Gen","janken":true},{"id":"m19f2c5442b486606","name":"Jitaro","janken":true},{"id":"m19f2c5442b51689f1","name":"Yamasaki","janken":true},{"id":"m19f2c5442b62c0a3","name":"T2","janken":true},{"id":"m19f2c5442b7e71ed","name":"Seiya","janken":true},{"id":"m19f2c5442b814ffd6","name":"Sosuke","janken":true},{"id":"m19f2c5442b9b2e80","name":"Shun","janken":true},{"id":"m19f2c5442ba4015d","name":"Umeda","janken":true},{"id":"m19f2c5442bb114add","name":"Dean","janken":true},{"id":"m19f2c5442bc77b6e","name":"Nakajima","janken":true},{"id":"m19f2c5442bd16d117","name":"Su","janken":true}],"sessions":[{"date":"2026-06-20","time":"05:30","attendees":["m19f2c5442ad159c20","m19f2c5442ab1cf90","m19f2c5442b112c96b","m19f2c5442af1932e","m19f2c5442b250436"],"jankenIds":["m19f2c5442ad159c20","m19f2c5442ab1cf90","m19f2c5442b112c96b","m19f2c5442af1932e","m19f2c5442b250436"],"winnerId":"m19f2c5442ad159c20","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-19","time":"05:30","attendees":["m19f2c5442ad159c20","m19f2c5442b315a6ff","m19f2c5442ab1cf90"],"jankenIds":["m19f2c5442ad159c20","m19f2c5442b315a6ff","m19f2c5442ab1cf90"],"winnerId":"m19f2c5442b315a6ff","amount":300,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-18","time":"05:30","attendees":["m19f2c5442ba4015d","m19f2c5442b486606","m19f2c5442ad159c20","m19f2c5442ab1cf90"],"jankenIds":["m19f2c5442ba4015d","m19f2c5442b486606","m19f2c5442ad159c20","m19f2c5442ab1cf90"],"winnerId":"m19f2c5442ad159c20","amount":300,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-17","time":"05:30","attendees":["m19f2c5442ba4015d","m19f2c5442aace286","m19f2c5442af1932e","m19f2c5442b486606","m19f2c5442ab1cf90"],"jankenIds":["m19f2c5442ba4015d","m19f2c5442aace286","m19f2c5442af1932e","m19f2c5442b486606","m19f2c5442ab1cf90"],"winnerId":"m19f2c5442ba4015d","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-16","time":"05:30","attendees":["m19f2c5442ad159c20","m19f2c5442ab1cf90"],"jankenIds":["m19f2c5442ad159c20","m19f2c5442ab1cf90"],"winnerId":null,"amount":0,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-15","time":"05:30","attendees":["m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442ab1cf90","m19f2c5442aace286","m19f2c5442bd16d117","m19f2c5442af1932e","m19f2c5442b486606"],"jankenIds":["m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442ab1cf90","m19f2c5442aace286","m19f2c5442bd16d117","m19f2c5442af1932e","m19f2c5442b486606"],"winnerId":"m19f2c5442acc5310","amount":500,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-14","time":"05:30","attendees":["m19f2c5442acc5310","m19f2c5442ab1cf90","m19f2c5442ba4015d","m19f2c5442b315a6ff","m19f2c5442bb114add","m19f2c5442bc77b6e"],"jankenIds":["m19f2c5442acc5310","m19f2c5442ab1cf90","m19f2c5442ba4015d","m19f2c5442b315a6ff","m19f2c5442bb114add","m19f2c5442bc77b6e"],"winnerId":"m19f2c5442bc77b6e","amount":0,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-13","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442ad159c20","m19f2c5442af1932e","m19f2c5442b315a6ff"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442ad159c20","m19f2c5442af1932e","m19f2c5442b315a6ff"],"winnerId":"m19f2c5442b315a6ff","amount":0,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-12","time":"05:30","attendees":["m19f2c5442aace286","m19f2c5442b486606","m19f2c5442b112c96b","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442aace286","m19f2c5442b486606","m19f2c5442b112c96b","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"winnerId":"m19f2c5442ab1cf90","amount":0,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-11","time":"05:30","attendees":["m19f2c5442af1932e","m19f2c5442aace286","m19f2c5442b250436","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442af1932e","m19f2c5442aace286","m19f2c5442b250436","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"winnerId":"m19f2c5442aace286","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-10","time":"05:30","attendees":["m19f2c5442b7e71ed","m19f2c5442b814ffd6","m19f2c5442b9b2e80","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442b7e71ed","m19f2c5442b814ffd6","m19f2c5442b9b2e80","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"winnerId":"m19f2c5442b7e71ed","amount":0,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-09","time":"05:30","attendees":["m19f2c5442b486606","m19f2c5442af1932e","m19f2c5442b250436","m19f2c5442b112c96b","m19f2c5442b7e71ed","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442aace286"],"jankenIds":["m19f2c5442b486606","m19f2c5442af1932e","m19f2c5442b250436","m19f2c5442b112c96b","m19f2c5442b7e71ed","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442aace286"],"winnerId":"m19f2c5442b112c96b","amount":550,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-08","time":"05:30","attendees":["m19f2c5442b486606","m19f2c5442b51689f1","m19f2c5442b62c0a3","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442b486606","m19f2c5442b51689f1","m19f2c5442b62c0a3","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"winnerId":"m19f2c5442ab1cf90","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-07","time":"05:30","attendees":["m19f2c5442af1932e","m19f2c5442b250436","m19f2c5442aace286","m19f2c5442b486606","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442af1932e","m19f2c5442b250436","m19f2c5442aace286","m19f2c5442b486606","m19f2c5442ad159c20"],"winnerId":"m19f2c5442af1932e","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-06","time":"05:30","attendees":["m19f2c5442af1932e","m19f2c5442b250436","m19f2c5442b315a6ff","m19f2c5442aace286","m19f2c5442b486606","m19f2c5442ab1cf90","m19f2c5442ad159c20","m19f2c5442b112c96b"],"jankenIds":["m19f2c5442af1932e","m19f2c5442b250436","m19f2c5442b315a6ff","m19f2c5442aace286","m19f2c5442b486606","m19f2c5442ab1cf90","m19f2c5442ad159c20","m19f2c5442b112c96b"],"winnerId":"m19f2c5442ab1cf90","amount":300,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-05","time":"05:30","attendees":["m19f2c5442b112c96b","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442b112c96b","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"winnerId":"m19f2c5442ad159c20","amount":300,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-04","time":"05:30","attendees":["m19f2c5442aace286","m19f2c5442ab1cf90","m19f2c5442acc5310"],"jankenIds":["m19f2c5442aace286","m19f2c5442ab1cf90","m19f2c5442acc5310"],"winnerId":"m19f2c5442acc5310","amount":0,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-03","time":"05:30","attendees":["m19f2c5442ae17892b","m19f2c5442af1932e","m19f2c5442aace286","m19f2c5442b0161efc","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442ae17892b","m19f2c5442af1932e","m19f2c5442aace286","m19f2c5442b0161efc","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"winnerId":"m19f2c5442ae17892b","amount":500,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-02","time":"05:30","attendees":["m19f2c5442aace286","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442aace286","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"winnerId":"m19f2c5442ab1cf90","amount":300,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-01","time":"05:30","attendees":["m19f2c5442aace286","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442aace286","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"winnerId":"m19f2c5442ab1cf90","amount":300,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-31","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"winnerId":"m19f2c5442ad159c20","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-30","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286","m19f2c5442af1932e","m19f2c5442b486606"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286","m19f2c5442af1932e","m19f2c5442b486606"],"winnerId":"m19f2c5442af1932e","amount":600,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-29","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"winnerId":"m19f2c5442ab1cf90","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-28","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"winnerId":"m19f2c5442acc5310","amount":300,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-27","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286","m19f2c5442b112c96b"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286","m19f2c5442b112c96b"],"winnerId":"m19f2c5442b112c96b","amount":500,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-26","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"winnerId":"m19f2c5442ab1cf90","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-25","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286","m19f2c5442b486606"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286","m19f2c5442b486606"],"winnerId":"m19f2c5442b486606","amount":500,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-24","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"winnerId":"m19f2c5442ad159c20","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-23","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286","m19f2c5442b315a6ff"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286","m19f2c5442b315a6ff"],"winnerId":"m19f2c5442b315a6ff","amount":500,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-22","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"winnerId":"m19f2c5442acc5310","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-21","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286","m19f2c5442af1932e"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286","m19f2c5442af1932e"],"winnerId":"m19f2c5442ab1cf90","amount":500,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-20","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"winnerId":"m19f2c5442ab1cf90","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-19","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"winnerId":"m19f2c5442aace286","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-18","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"winnerId":"m19f2c5442ab1cf90","amount":300,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-17","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"winnerId":"m19f2c5442ab1cf90","amount":300,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"}]};
+  const SEEDV="thcc_seed_v2";
+  if(!localStorage.getItem(RKEY) && !localStorage.getItem(TKEY)){
+    jsave(RKEY, SEED.roster); jsave(TKEY, SEED.sessions);
+    localStorage.setItem(SEEDV,"1");
+  } else if(!localStorage.getItem(SEEDV)){
+    // 旧シード（カタカナ名・未編集）ならローマ字版に置き換え
+    try{
+      const r0=JSON.parse(localStorage.getItem(RKEY))||[], s0=JSON.parse(localStorage.getItem(TKEY))||[];
+      const oldSeed = s0.length===35 && r0.some(m=>m.name==="テツ") && r0.some(m=>m.name==="クラサカ")
+        && s0.every(s=>s.date>="2026-05-17" && s.date<="2026-06-20");
+      if(oldSeed){ jsave(RKEY, SEED.roster); jsave(TKEY, SEED.sessions); }
+    }catch(e){}
+    localStorage.setItem(SEEDV,"1");
+  }
+
+  let roster   = jload(RKEY, []);            // [{id,name}]
+  let sessions = jload(TKEY, []);            // [{date,time,attendees:[id],jankenIds:[id],winnerId,amount,phases,note,checkin,savedAt}]
+  let config   = jload(CKEY, {host:"",webhook:"",auto:false});
+
+  const uid=()=> "m"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  const WD=["日","月","火","水","木","金","土"];
+  function todayStr(){ const d=new Date(); return ymd(d); }
+  function ymd(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+  function parseD(s){ const p=s.split("-"); return new Date(+p[0],+p[1]-1,+p[2]); }
+  function yen(n){ return "¥"+(n||0).toLocaleString("ja-JP"); }
+  function esc(s){ return (s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+  function memberName(id){ const m=roster.find(x=>x.id===id); return m?m.name:"（不明）"; }
+  function effWebhook(){ return (config.webhook||"").trim() || BUILTIN_WEBHOOK; }
+
+  const MENU=[{k:"run",e:"🏃",l:"RUN"},{k:"hiit",e:"🔥",l:"HEAT"},{k:"ice",e:"🧊",l:"ICE"}];
+
+  // ---- record-tab state ----
+  let attArr=[];        // 参加者（来た人全員）
+  let jankenArr=[];     // 男気じゃんけん参加者（attArrの部分集合・女性子供除外）
+  let winnerId=null;    // 勝者（奢る人）
+  let phases=["run","hiit","ice"];
+  let checkin=null;
+  let editingDate=null;
+  function eligible(id){ const m=roster.find(x=>x.id===id); return m ? m.janken!==false : false; }
+  let statMonth=(function(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); })();
+  let crewSort="att";
+
+  /* ---------- header ---------- */
+  function renderHeader(){
+    const d=new Date();
+    document.getElementById("hdrDate").textContent=(d.getMonth()+1)+"/"+d.getDate()+" "+WD[d.getDay()];
+    document.getElementById("hdrTime").innerHTML=(config.defaultTime||"05:30")+"<small> START</small>";
+    document.getElementById("streakN").textContent=calcStreak();
+  }
+  function calcStreak(){
+    const set=new Set(sessions.map(s=>s.date));
+    let n=0, cur=new Date();
+    if(!set.has(ymd(cur))) cur.setDate(cur.getDate()-1);
+    while(set.has(ymd(cur))){ n++; cur.setDate(cur.getDate()-1); }
+    return n;
+  }
+
+  /* ---------- record tab ---------- */
+  function renderMenu(){
+    const c=document.getElementById("menuChips"); c.innerHTML="";
+    MENU.forEach(m=>{
+      const el=document.createElement("div");
+      el.className="chip"+(phases.includes(m.k)?" on":"");
+      el.innerHTML=m.e+" "+m.l;
+      el.onclick=()=>{ if(phases.includes(m.k)) phases=phases.filter(x=>x!==m.k); else phases.push(m.k); renderMenu(); };
+      c.appendChild(el);
+    });
+  }
+  function renderAtt(){
+    const c=document.getElementById("attChips"); c.innerHTML="";
+    const ranked=[...roster].sort((a,b)=>attendCount(b.id)-attendCount(a.id));
+    ranked.forEach(m=>{
+      const el=document.createElement("div");
+      el.className="chip"+(attArr.includes(m.id)?" on":"");
+      el.innerHTML=esc(m.name)+(m.janken===false?" <span class='cnt'>♀/子</span>":"");
+      el.onclick=()=>{
+        if(attArr.includes(m.id)){ attArr=attArr.filter(x=>x!==m.id); jankenArr=jankenArr.filter(x=>x!==m.id); if(winnerId===m.id) winnerId=null; }
+        else { attArr.push(m.id); if(eligible(m.id)) jankenArr.push(m.id); }
+        renderAtt(); renderJankenPart(); renderWinner();
+      };
+      c.appendChild(el);
+    });
+    const add=document.createElement("div");
+    add.className="chip add"; add.innerHTML="+ 新しい人";
+    add.onclick=()=>{ const b=document.getElementById("addMemberBox"); b.style.display=b.style.display==="none"?"block":"none"; if(b.style.display==="block") document.getElementById("newMemberName").focus(); };
+    c.appendChild(add);
+    document.getElementById("attCount").textContent = attArr.length? attArr.length+"名" : "";
+  }
+  function renderJankenPart(){
+    const c=document.getElementById("jankenPartChips"); c.innerHTML="";
+    const elig=attArr.filter(eligible);
+    if(elig.length===0){ c.innerHTML="<div class='hint'>じゃんけん対象の参加者がいません（女性・子供は自動で除外）。</div>"; return; }
+    elig.forEach(id=>{
+      const el=document.createElement("div");
+      el.className="chip"+(jankenArr.includes(id)?" on":"");
+      el.innerHTML=esc(memberName(id));
+      el.onclick=()=>{ if(jankenArr.includes(id)){ jankenArr=jankenArr.filter(x=>x!==id); if(winnerId===id) winnerId=null; } else jankenArr.push(id); renderJankenPart(); renderWinner(); };
+      c.appendChild(el);
+    });
+  }
+  function renderWinner(){
+    const c=document.getElementById("winnerChips"); c.innerHTML="";
+    if(jankenArr.length===0){ c.innerHTML="<div class='hint'>先にじゃんけん参加者を選んでください。</div>"; return; }
+    jankenArr.forEach(id=>{
+      const el=document.createElement("div");
+      el.className="chip"+(winnerId===id?" winner":"");
+      el.innerHTML=(winnerId===id?"🏆 ":"")+esc(memberName(id));
+      el.onclick=()=>{ winnerId=(winnerId===id?null:id); renderWinner(); };
+      c.appendChild(el);
+    });
+  }
+  function addMember(name, janken){
+    name=(name||"").trim(); if(!name) return null;
+    let ex=roster.find(m=>m.name===name);
+    if(ex){ if(janken!==undefined){ ex.janken=janken; jsave(RKEY,roster); } return ex.id; }
+    const id=uid(); roster.push({id,name,janken: janken!==false}); jsave(RKEY,roster);
+    return id;
+  }
+
+  document.getElementById("confirmAddMember").onclick=()=>{
+    const inp=document.getElementById("newMemberName");
+    const jk=document.getElementById("newMemberJanken").checked;
+    const id=addMember(inp.value, jk);
+    if(!id){ toast("名前を入力してください"); return; }
+    if(!attArr.includes(id)){ attArr.push(id); if(jk) jankenArr.push(id); }
+    inp.value=""; document.getElementById("newMemberJanken").checked=true;
+    document.getElementById("addMemberBox").style.display="none";
+    renderAtt(); renderJankenPart(); renderWinner(); renderCrew();
+  };
+  document.getElementById("sameAsLast").onclick=()=>{
+    const last=[...sessions].sort((a,b)=>b.date.localeCompare(a.date))[0];
+    if(!last){ toast("まだ前回の記録がありません"); return; }
+    attArr=last.attendees.filter(id=>roster.find(m=>m.id===id));
+    jankenArr=(last.jankenIds||attArr.filter(eligible)).filter(id=>attArr.includes(id));
+    winnerId=null; renderAtt(); renderJankenPart(); renderWinner(); toast("前回のメンバーをセット↻",'t');
+  };
+  document.getElementById("clearAtt").onclick=()=>{ attArr=[]; jankenArr=[]; winnerId=null; renderAtt(); renderJankenPart(); renderWinner(); };
+  document.getElementById("noJanken").onclick=()=>{ winnerId=null; document.getElementById("treatAmount").value=""; renderWinner(); toast("奢りなしに設定"); };
+
+  document.getElementById("geoBtn").onclick=function(){
+    const mini=document.getElementById("geoMini");
+    if(!navigator.geolocation){ mini.textContent="⚠️ この端末では位置情報が使えません"; return; }
+    this.textContent="📡 取得中…"; const btn=this;
+    navigator.geolocation.getCurrentPosition(p=>{
+      checkin={lat:+p.coords.latitude.toFixed(5),lng:+p.coords.longitude.toFixed(5)};
+      mini.innerHTML="✅ 位置を記録：緯度 "+checkin.lat+" / 経度 "+checkin.lng;
+      btn.textContent="📍 位置を記録済み";
+    },()=>{ mini.textContent="⚠️ 位置情報を取得できませんでした"; btn.textContent="📍 位置を記録（任意）"; },{enableHighAccuracy:true,timeout:10000});
+  };
+
+  document.getElementById("saveBtn").onclick=function(){
+    const date = editingDate || document.getElementById("sesDate").value || todayStr();
+    const time = document.getElementById("sesTime").value || "05:30";
+    if(attArr.length===0){ toast("参加メンバーを選んでください",'r'); return; }
+    const amount = parseInt(document.getElementById("treatAmount").value,10) || 0;
+    const hasWinner = winnerId && jankenArr.includes(winnerId);
+    const rec={
+      date, time,
+      attendees: attArr.slice(),
+      jankenIds: jankenArr.slice(),
+      winnerId: hasWinner? winnerId : null,
+      amount: hasWinner? amount : 0,
+      phases: phases.slice(),
+      note: document.getElementById("sesNote").value.trim(),
+      checkin: checkin,
+      savedAt: new Date().toISOString()
+    };
+    const wasEditing=!!editingDate;
+    sessions = sessions.filter(s=>s.date!==rec.date);
+    sessions.push(rec);
+    sessions.sort((a,b)=>b.date.localeCompare(a.date));
+    jsave(TKEY,sessions);
+
+    if(config.auto && effWebhook()){
+      sendDiscord(buildMessage(rec)).then(()=>toast("Discordに投稿📣",'t')).catch(()=>toast("投稿失敗⚠️ 設定を確認",'r'));
+    }
+    freeEntry=false;
+    resetForm();
+    refreshAll();
+    toast(wasEditing? "記録を更新しました✏️" : "RECORDED. 連続"+calcStreak()+"日目🔥",'t');
+    switchTab('log');
+  };
+
+  document.getElementById("editTodayBtn").onclick=()=> startEdit(todayStr());
+  document.getElementById("otherDayBtn").onclick=()=>{
+    freeEntry=true; resetForm(); renderRecordState();
+    toast("日付を選んでください📅 記録がある日は自動で呼び出します");
+  };
+  document.getElementById("sesDate").onchange=function(){
+    const v=this.value; if(!v) return;
+    const s=sessions.find(x=>x.date===v);
+    if(s){ startEdit(v); }
+    else if(editingDate){
+      // 編集中に未記録の日へ変えたら、新規入力に切り替え（入力内容は保持）
+      editingDate=null; freeEntry=true;
+      document.getElementById("editBanner").style.display="none";
+    }
+  };
+
+  function resetForm(){
+    attArr=[]; jankenArr=[]; winnerId=null; phases=["run","hiit","ice"]; checkin=null; editingDate=null;
+    document.getElementById("sesDate").value=todayStr();
+    document.getElementById("sesTime").value=config.defaultTime||"05:30";
+    document.getElementById("treatAmount").value="";
+    document.getElementById("sesNote").value="";
+    document.getElementById("geoMini").textContent="";
+    document.getElementById("geoBtn").textContent="📍 位置を記録（任意）";
+    document.getElementById("editBanner").style.display="none";
+    document.getElementById("addMemberBox").style.display="none";
+  }
+  let freeEntry=false;
+  function renderRecordState(){
+    const done = sessions.some(s=>s.date===todayStr()) && !editingDate && !freeEntry;
+    document.getElementById("doneState").style.display = done? "block":"none";
+    document.getElementById("formArea").style.display = done? "none":"block";
+    if(!done){ renderMenu(); renderAtt(); renderJankenPart(); renderWinner(); }
+  }
+  function startEdit(date){
+    const s=sessions.find(x=>x.date===date); if(!s) return;
+    editingDate=date;
+    attArr=s.attendees.filter(id=>roster.find(m=>m.id===id));
+    jankenArr=(s.jankenIds||attArr.filter(eligible)).filter(id=>attArr.includes(id));
+    winnerId=s.winnerId||null;
+    phases=(s.phases&&s.phases.length)? s.phases.slice():["run","hiit","ice"];
+    checkin=s.checkin||null;
+    document.getElementById("sesDate").value=s.date;
+    document.getElementById("sesTime").value=s.time||"05:30";
+    document.getElementById("treatAmount").value=s.amount||"";
+    document.getElementById("sesNote").value=s.note||"";
+    document.getElementById("geoMini").textContent = checkin? ("✅ 位置あり：緯度 "+checkin.lat+" / 経度 "+checkin.lng):"";
+    const b=document.getElementById("editBanner"); b.style.display="block";
+    const d=parseD(date); b.textContent="✏️ "+(d.getMonth()+1)+"/"+d.getDate()+" ("+WD[d.getDay()]+") を編集中";
+    document.getElementById("doneState").style.display="none";
+    document.getElementById("formArea").style.display="block";
+    renderMenu(); renderAtt(); renderJankenPart(); renderWinner();
+    switchTab('log');
+    document.getElementById("recordCard").scrollIntoView({behavior:"smooth"});
+  }
+
+  /* ---------- stats ---------- */
+  function attendCount(id,ym){ return sessions.filter(s=>(!ym||s.date.startsWith(ym)) && s.attendees.includes(id)).length; }
+  function treatTotal(id,ym){ return sessions.filter(s=>(!ym||s.date.startsWith(ym)) && s.winnerId===id).reduce((a,s)=>a+(s.amount||0),0); }
+
+  function renderStats(){
+    const d=parseD(statMonth+"-01");
+    document.getElementById("statMonth").textContent=d.getFullYear()+"年 "+(d.getMonth()+1)+"月";
+    const ses=sessions.filter(s=>s.date.startsWith(statMonth));
+    const attend=ses.reduce((a,s)=>a+s.attendees.length,0);
+    const treat=ses.reduce((a,s)=>a+(s.amount||0),0);
+    document.getElementById("stSessions").textContent=ses.length;
+    document.getElementById("stAttend").textContent=attend;
+    document.getElementById("stTreat").textContent=yen(treat);
+
+    // treat ranking this month
+    const tl=document.getElementById("treatList"); tl.innerHTML="";
+    const treats=roster.map(m=>({name:m.name,v:treatTotal(m.id,statMonth)})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+    if(treats.length===0){ tl.innerHTML="<div class='empty'>今月の奢りはまだありません<span class='dot'>。</span></div>"; }
+    else{
+      const max=treats[0].v;
+      treats.forEach((t,i)=>{
+        const el=document.createElement("div"); el.className="lb-item";
+        el.innerHTML="<div class='lb-rank g"+(i<3?i+1:"")+"'>"+(i+1)+"</div>"+
+          "<div class='lb-body'><div class='lb-name'>"+esc(t.name)+"</div>"+
+          "<div class='lb-bar'><span style='width:"+Math.round(t.v/max*100)+"%;background:var(--red)'></span></div></div>"+
+          "<div class='lb-val r'>"+yen(t.v)+"</div>";
+        tl.appendChild(el);
+      });
+    }
+    renderHistory();
+  }
+  function renderHistory(){
+    const c=document.getElementById("histList"); c.innerHTML="";
+    const ses=sessions.filter(s=>s.date.startsWith(statMonth));
+    if(ses.length===0){ c.innerHTML="<div class='empty'>この月の記録はまだありません<span class='dot'>。</span></div>"; return; }
+    ses.forEach(s=>{
+      const d=parseD(s.date);
+      const names=s.attendees.map(memberName).join("・");
+      const el=document.createElement("div"); el.className="hist";
+      let treat="";
+      if(s.winnerId) treat="<div class='hist-treat'>🏆 <span class='who'>"+esc(memberName(s.winnerId))+"</span> が "+yen(s.amount)+" 奢り</div>";
+      const ph=(s.phases||["run","hiit","ice"]).map(k=>{const x=MENU.find(m=>m.k===k);return x?x.e:"";}).join("");
+      el.innerHTML=
+        "<div class='hist-date'><div class='d'>"+d.getDate()+"</div><div class='m'>"+(d.getMonth()+1)+"月("+WD[d.getDay()]+")</div></div>"+
+        "<div class='hist-body'><div class='hist-top'>"+s.attendees.length+"名参加 <span style='font-weight:400'>"+ph+"</span></div>"+
+          "<div class='hist-att'>"+esc(names)+"</div>"+treat+
+          (s.note?"<div class='hist-att'>📝 "+esc(s.note)+"</div>":"")+"</div>"+
+        "<div class='hist-acts'><button data-s='"+s.date+"'>📸</button><button class='e' data-e='"+s.date+"'>✏️</button><button data-x='"+s.date+"'>✕</button></div>";
+      c.appendChild(el);
+    });
+    c.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>openShare(b.getAttribute("data-s")));
+    c.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>startEdit(b.getAttribute("data-e")));
+    c.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{
+      const date=b.getAttribute("data-x");
+      if(confirm("この日の記録を削除しますか？")){ sessions=sessions.filter(s=>s.date!==date); jsave(TKEY,sessions); refreshAll(); toast("削除しました"); }
+    });
+  }
+  document.getElementById("prevMo").onclick=()=>{ const d=parseD(statMonth+"-01"); d.setMonth(d.getMonth()-1); statMonth=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); renderStats(); };
+  document.getElementById("nextMo").onclick=()=>{ const d=parseD(statMonth+"-01"); d.setMonth(d.getMonth()+1); statMonth=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); renderStats(); };
+
+  /* ---------- crew ---------- */
+  function renderCrew(){
+    document.getElementById("crewCount").textContent=roster.length? roster.length+"名":"";
+    const c=document.getElementById("crewList"); c.innerHTML="";
+    if(roster.length===0){ c.innerHTML="<div class='empty'>まだメンバーがいません。<br>上から追加するか、記録画面で「+新しい人」から登録<span class='dot'>。</span></div>"; return; }
+    const list=roster.map(m=>({...m,att:attendCount(m.id),treat:treatTotal(m.id)}));
+    list.sort((a,b)=> crewSort==="att"? b.att-a.att : b.treat-a.treat);
+    const maxAtt=Math.max(1,...list.map(x=>x.att));
+    list.forEach((m,i)=>{
+      const el=document.createElement("div"); el.className="lb-item";
+      el.innerHTML="<div class='lb-rank g"+(i<3?i+1:"")+"'>"+(i+1)+"</div>"+
+        "<div class='lb-body'><div class='lb-name'>"+esc(m.name)+(m.janken===false?" <span class='cnt'>♀/子</span>":"")+"</div>"+
+        "<div class='lb-sub'>参加 "+m.att+"回 ・ 奢り累計 "+yen(m.treat)+"</div>"+
+        "<div class='lb-bar'><span style='width:"+Math.round(m.att/maxAtt*100)+"%'></span></div></div>"+
+        "<div class='hist-acts'><button data-rj='"+m.id+"' style='color:"+(m.janken!==false?'var(--teal)':'var(--muted2)')+"'>🥊</button><button class='e' data-rn='"+m.id+"'>✎</button><button data-rx='"+m.id+"'>✕</button></div>";
+      c.appendChild(el);
+    });
+    c.querySelectorAll("[data-rj]").forEach(b=>b.onclick=()=>{
+      const m=roster.find(x=>x.id===b.getAttribute("data-rj"));
+      m.janken=(m.janken===false); jsave(RKEY,roster); refreshAll();
+      toast(m.name+"：じゃんけん"+(m.janken!==false?"参加":"除外"));
+    });
+    c.querySelectorAll("[data-rn]").forEach(b=>b.onclick=()=>{
+      const id=b.getAttribute("data-rn"); const m=roster.find(x=>x.id===id);
+      const nn=prompt("名前を変更", m.name); if(nn&&nn.trim()){ m.name=nn.trim(); jsave(RKEY,roster); refreshAll(); }
+    });
+    c.querySelectorAll("[data-rx]").forEach(b=>b.onclick=()=>{
+      const id=b.getAttribute("data-rx"); const m=roster.find(x=>x.id===id);
+      if(confirm("「"+m.name+"」を削除しますか？（過去の記録は残ります）")){ roster=roster.filter(x=>x.id!==id); jsave(RKEY,roster); refreshAll(); }
+    });
+  }
+  document.getElementById("crewAddBtn").onclick=()=>{
+    const inp=document.getElementById("crewNewName"); const id=addMember(inp.value);
+    if(!id){ toast("名前を入力してください"); return; }
+    inp.value=""; renderCrew(); renderAtt(); toast("メンバーを追加🤝",'t');
+  };
+  document.getElementById("sortAtt").onclick=function(){ crewSort="att"; this.classList.add("on"); document.getElementById("sortTreat").classList.remove("on"); renderCrew(); };
+  document.getElementById("sortTreat").onclick=function(){ crewSort="treat"; this.classList.add("on"); document.getElementById("sortAtt").classList.remove("on"); renderCrew(); };
+
+  /* ---------- Discord ---------- */
+  function buildMessage(rec){
+    const d=parseD(rec.date);
+    const names=rec.attendees.map(memberName);
+    const lines=[];
+    lines.push("🌅 **朝活 RHIR** "+d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate()+" ("+WD[d.getDay()]+") "+(rec.time||"05:30")+" START");
+    lines.push("🔥 連続"+calcStreak()+"日目"+(config.host?"｜主催 "+config.host:""));
+    const menu=(rec.phases||["run","hiit","ice"]).map(k=>{const x=MENU.find(m=>m.k===k);return x?x.e+" "+x.l:"";}).filter(Boolean);
+    if(menu.length) lines.push("🔁 "+menu.join(" → ")+" → REPEAT");
+    lines.push("");
+    lines.push("👥 参加 "+names.length+"名");
+    lines.push("・"+names.join("　・"));
+    if(rec.winnerId){
+      const mTreat=treatTotal(rec.winnerId,rec.date.slice(0,7));
+      const jn=(rec.jankenIds||[]).length;
+      lines.push("");
+      lines.push("🥊 男気じゃんけん"+(jn?" "+jn+"名":"")+" → 🏆 **"+memberName(rec.winnerId)+"** が "+yen(rec.amount)+" 奢り！");
+      lines.push("（"+(d.getMonth()+1)+"月トータル "+memberName(rec.winnerId)+"："+yen(mTreat)+"）");
+    }
+    if(rec.checkin) lines.push("📍 https://maps.google.com/?q="+rec.checkin.lat+","+rec.checkin.lng);
+    if(rec.note){ lines.push(""); lines.push("📝 "+rec.note); }
+    lines.push("— Thcc.");
+    return lines.join("\n");
+  }
+  function sendDiscord(content){
+    const url=effWebhook();
+    if(!url) return Promise.reject(new Error("no webhook"));
+    const fd=new FormData();
+    fd.append("payload_json", JSON.stringify({content:content, username:"RHIR｜朝活ログ", allowed_mentions:{parse:[]}}));
+    return fetch(url,{method:"POST",body:fd}).then(r=>{ if(!r.ok) throw new Error("status "+r.status); });
+  }
+
+  /* ---------- share image (Insta / Threads) ---------- */
+  const JPFONT='"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif';
+  function wrapText(ctx,text,maxW){
+    const out=[]; let line="";
+    for(const ch of text){
+      if(ctx.measureText(line+ch).width>maxW && line){ out.push(line); line=ch; }
+      else line+=ch;
+    }
+    if(line) out.push(line);
+    return out;
+  }
+  function drawShare(rec){
+    const W=1080,H=1920;
+    const cv=document.createElement("canvas"); cv.width=W; cv.height=H;
+    const x=cv.getContext("2d");
+    const TEAL="#19e3c4",RED="#ff3a1f",WHT="#f4f6f7",MUT="#7b828c",LINE="#2a2f38";
+    // bg + glows
+    x.fillStyle="#0a0b0d"; x.fillRect(0,0,W,H);
+    let g=x.createRadialGradient(W*.9,80,0,W*.9,80,820);
+    g.addColorStop(0,"rgba(25,227,196,.13)"); g.addColorStop(1,"rgba(25,227,196,0)");
+    x.fillStyle=g; x.fillRect(0,0,W,H);
+    g=x.createRadialGradient(60,H*.8,0,60,H*.8,820);
+    g.addColorStop(0,"rgba(255,58,31,.12)"); g.addColorStop(1,"rgba(255,58,31,0)");
+    x.fillStyle=g; x.fillRect(0,0,W,H);
+    // frame + teal corner ticks
+    x.strokeStyle=LINE; x.lineWidth=2; x.strokeRect(42,42,W-84,H-84);
+    x.strokeStyle=TEAL; x.lineWidth=6;
+    [[42,42,1,1],[W-42,42,-1,1],[42,H-42,1,-1],[W-42,H-42,-1,-1]].forEach(c=>{
+      x.beginPath(); x.moveTo(c[0],c[1]+70*c[3]); x.lineTo(c[0],c[1]); x.lineTo(c[0]+70*c[2],c[1]); x.stroke();
+    });
+    const cx=W/2; x.textAlign="center";
+    let y=170;
+    // brand
+    x.fillStyle=TEAL; x.font="700 30px "+JPFONT;
+    x.fillText("T H C C . B K K   —   M O R N I N G   C L U B",cx,y); y+=78;
+    x.fillStyle=MUT; x.font="300 36px "+JPFONT;
+    x.fillText("ア サ カ ツ キ ロ ク",cx,y); y+=128;
+    // title
+    x.save(); x.translate(cx,y); x.transform(1,0,-0.14,1,0,0);
+    x.fillStyle=RED; x.font="900 160px "+JPFONT; x.fillText("朝活記録。",8,8);
+    x.fillStyle=WHT; x.fillText("朝活記録。",0,0);
+    x.restore(); y+=84;
+    x.fillStyle=MUT; x.font="400 42px Anton, sans-serif";
+    x.fillText("A S A K A T S U   L O G",cx,y); y+=104;
+    // big date
+    const d=parseD(rec.date);
+    x.fillStyle=WHT; x.font="400 200px Anton, sans-serif";
+    x.fillText((d.getMonth()+1)+"."+d.getDate(),cx,y+140); y+=210;
+    // day chip + start time
+    const dayTxt=["SUN","MON","TUE","WED","THU","FRI","SAT"][d.getDay()];
+    x.font="800 40px "+JPFONT;
+    const chipW=x.measureText(dayTxt).width+56, chipH=64;
+    const startTxt=(rec.time||"05:30")+" START";
+    x.font="700 40px "+JPFONT;
+    const stW=x.measureText(startTxt).width;
+    const sx0=cx-(chipW+30+stW)/2;
+    x.fillStyle=TEAL; x.beginPath();
+    if(x.roundRect) x.roundRect(sx0,y-chipH+14,chipW,chipH,10); else x.rect(sx0,y-chipH+14,chipW,chipH);
+    x.fill();
+    x.fillStyle="#06251f"; x.font="800 40px "+JPFONT; x.fillText(dayTxt,sx0+chipW/2,y);
+    x.fillStyle=WHT; x.font="700 40px "+JPFONT;
+    x.textAlign="left"; x.fillText(startTxt,sx0+chipW+30,y); x.textAlign="center";
+    y+=112;
+    // menu boxes
+    const menu=(rec.phases||["run","hiit","ice"]).map(k=>{const m=MENU.find(v=>v.k===k);return m?m.e+" "+m.l:"";}).filter(Boolean);
+    if(menu.length){
+      x.font="700 38px "+JPFONT;
+      const pad=30,gap=22,bh=76;
+      const widths=menu.map(t=>x.measureText(t).width+pad*2);
+      let bx=cx-(widths.reduce((a,b)=>a+b,0)+gap*(menu.length-1))/2;
+      menu.forEach((t,i)=>{
+        x.strokeStyle=LINE; x.lineWidth=2; x.fillStyle="rgba(255,255,255,.03)";
+        x.beginPath();
+        if(x.roundRect) x.roundRect(bx,y-bh+22,widths[i],bh,12); else x.rect(bx,y-bh+22,widths[i],bh);
+        x.fill(); x.stroke();
+        x.fillStyle=WHT; x.fillText(t,bx+widths[i]/2,y);
+        bx+=widths[i]+gap;
+      });
+      y+=64;
+      x.fillStyle=MUT; x.font="700 30px "+JPFONT;
+      x.fillText("→  R E P E A T",cx,y); y+=100;
+    }
+    // attendance
+    x.fillStyle=TEAL; x.font="400 96px Anton, sans-serif";
+    x.fillText(String(rec.attendees.length),cx-56,y);
+    x.fillStyle=WHT; x.font="700 40px "+JPFONT;
+    x.textAlign="left"; x.fillText("名参加",cx+10,y); x.textAlign="center"; y+=70;
+    x.fillStyle=WHT; x.font="500 38px "+JPFONT;
+    const names=rec.attendees.map(memberName).join(" ・ ");
+    const nameLines=wrapText(x,names,W-220);
+    if(nameLines.length>3){ nameLines.length=3; nameLines[2]=nameLines[2].slice(0,-2)+"…"; }
+    for(const ln of nameLines){ x.fillText(ln,cx,y); y+=54; }
+    y+=44;
+    // winner band
+    if(rec.winnerId){
+      const bh2=180, top=y-52;
+      x.fillStyle="rgba(255,58,31,.10)"; x.fillRect(44,top,W-88,bh2);
+      x.fillStyle=RED; x.fillRect(44,top,10,bh2);
+      x.fillStyle=MUT; x.font="700 30px "+JPFONT; x.fillText("🥊 男気じゃんけん",cx,y);
+      x.fillStyle=RED; x.font="900 58px "+JPFONT;
+      x.fillText("🏆 "+memberName(rec.winnerId)+" が "+yen(rec.amount)+" 奢り！",cx,y+86);
+      y=top+bh2+60;
+    }
+    // note（下のSTREAK表示に重なる場合は省略）
+    if(rec.note && y<=H-540){
+      x.fillStyle=MUT; x.font="500 34px "+JPFONT;
+      for(const ln of wrapText(x,"📝 "+rec.note,W-240).slice(0,2)){ x.fillText(ln,cx,y); y+=48; }
+    }
+    // bottom: streak + brand
+    let by=H-336;
+    x.fillStyle=RED; x.fillRect(cx-40,by-118,80,8);
+    x.fillStyle=WHT; x.font="400 100px Anton, sans-serif";
+    x.fillText(String(calcStreak()),cx,by); by+=50;
+    x.fillStyle=MUT; x.font="700 30px "+JPFONT;
+    x.fillText("D A Y   S T R E A K",cx,by); by+=96;
+    x.strokeStyle=LINE; x.lineWidth=2;
+    x.beginPath(); x.moveTo(120,by-54); x.lineTo(W-120,by-54); x.stroke();
+    x.fillStyle=WHT; x.font="400 40px Anton, sans-serif";
+    x.fillText("RUN. HEAT. ICE. REPEAT.",cx,by); by+=52;
+    x.fillStyle=TEAL; x.font="600 32px "+JPFONT;
+    x.fillText("@thcc.bkk ・ @tetsu.ice",cx,by);
+    return cv;
+  }
+  let shareBlob=null, shareDate=null, sharePrevUrl=null;
+  async function openShare(date){
+    const rec=sessions.find(s=>s.date===date);
+    if(!rec){ toast("その日の記録がありません",'r'); return; }
+    try{ await document.fonts.load('400 100px Anton'); }catch(e){}
+    const cv=drawShare(rec);
+    cv.toBlob(b=>{
+      if(!b){ toast("画像を作れませんでした⚠️",'r'); return; }
+      shareBlob=b; shareDate=date;
+      if(sharePrevUrl) URL.revokeObjectURL(sharePrevUrl);
+      sharePrevUrl=URL.createObjectURL(b);
+      document.getElementById("sharePrev").src=sharePrevUrl;
+      document.getElementById("shareOv").classList.add("show");
+    },"image/png");
+  }
+  document.getElementById("shareTodayBtn").onclick=()=>openShare(todayStr());
+  document.getElementById("shareCloseBtn").onclick=()=>document.getElementById("shareOv").classList.remove("show");
+  document.getElementById("shareDlBtn").onclick=()=>{
+    if(!shareBlob) return;
+    const a=document.createElement("a"); a.href=URL.createObjectURL(shareBlob);
+    a.download="asakatsu_"+shareDate+".png"; a.click(); URL.revokeObjectURL(a.href);
+    toast("画像を保存しました📸",'t');
+  };
+  document.getElementById("shareSendBtn").onclick=async()=>{
+    if(!shareBlob) return;
+    const file=new File([shareBlob],"asakatsu_"+shareDate+".png",{type:"image/png"});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{ await navigator.share({files:[file]}); }catch(e){}
+    }else{
+      document.getElementById("shareDlBtn").click();
+      toast("この端末は直接シェア非対応。保存→Instaに投稿してください");
+    }
+  };
+
+  /* ---------- config ---------- */
+  function applyConfig(){
+    document.getElementById("cfgHost").value=config.host||"";
+    document.getElementById("cfgWebhook").value=config.webhook||"";
+    document.getElementById("cfgAuto").checked=!!config.auto;
+  }
+  document.getElementById("saveConfig").onclick=()=>{
+    config.host=document.getElementById("cfgHost").value.trim();
+    config.webhook=document.getElementById("cfgWebhook").value.trim();
+    config.auto=document.getElementById("cfgAuto").checked;
+    jsave(CKEY,config); refreshAll(); toast("設定を保存しました⚙︎",'t');
+  };
+  document.getElementById("testDiscord").onclick=()=>{
+    config.webhook=document.getElementById("cfgWebhook").value.trim(); jsave(CKEY,config);
+    if(!effWebhook()){ toast("Webhook URLを入力してください",'r'); return; }
+    sendDiscord("✅ テスト送信：RHIR 朝活ログと接続できました🌅 覚悟の量が力を上げる。— Thcc.")
+      .then(()=>toast("送信成功！Discordを確認🎉",'t')).catch(()=>toast("送信失敗⚠️ URLを確認",'r'));
+  };
+
+  /* ---------- backup ---------- */
+  document.getElementById("exportBtn").onclick=()=>{
+    const data={roster,sessions,config,exportedAt:new Date().toISOString(),app:"RHIR-thcc"};
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+    const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+    a.download="RHIR_backup_"+todayStr()+".json"; a.click(); URL.revokeObjectURL(a.href);
+    toast("バックアップを書き出しました↓",'t');
+  };
+  document.getElementById("importBtn").onclick=()=> document.getElementById("importFile").click();
+  document.getElementById("importFile").onchange=function(e){
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=()=>{
+      try{
+        const d=JSON.parse(r.result);
+        if(!d.roster||!d.sessions) throw new Error("format");
+        if(!confirm("読み込むと現在のデータに統合されます。続けますか？")) return;
+        // merge roster by name
+        d.roster.forEach(m=>{ if(!roster.find(x=>x.name===m.name)) roster.push({id:m.id||uid(),name:m.name,janken:m.janken}); });
+        // merge sessions by date (imported wins)
+        const dates=new Set(d.sessions.map(s=>s.date));
+        sessions=sessions.filter(s=>!dates.has(s.date)).concat(d.sessions);
+        sessions.sort((a,b)=>b.date.localeCompare(a.date));
+        if(d.config){ config=Object.assign({},config,d.config); applyConfig(); }
+        jsave(RKEY,roster); jsave(TKEY,sessions); jsave(CKEY,config);
+        refreshAll(); toast("読み込み完了🤝",'t');
+      }catch(err){ toast("ファイルを読み込めませんでした⚠️",'r'); }
+    };
+    r.readAsText(f); this.value="";
+  };
+
+  /* ---------- tabs / toast / refresh ---------- */
+  function switchTab(name){
+    document.querySelectorAll(".tabpage").forEach(p=>p.classList.toggle("active",p.id==="tab-"+name));
+    document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.getAttribute("data-tab")===name));
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+  document.querySelectorAll("nav button").forEach(b=> b.onclick=()=> switchTab(b.getAttribute("data-tab")) );
+
+  let tt;
+  function toast(msg,kind){
+    const t=document.getElementById("toast");
+    t.className="toast show"+(kind?(" "+kind):"");
+    t.textContent=msg; clearTimeout(tt); tt=setTimeout(()=>t.className="toast",2600);
+  }
+
+  function refreshAll(){ renderHeader(); renderRecordState(); renderStats(); renderCrew(); }
+
+  /* ---------- init ---------- */
+  document.getElementById("sesDate").value=todayStr();
+  applyConfig();
+  refreshAll();
+})();
+</script>
+</body>
+</html>
