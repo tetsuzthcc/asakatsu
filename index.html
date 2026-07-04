@@ -371,6 +371,32 @@
     </div>
   </section>
 
+  <!-- ===== 途中経過 TAB ===== -->
+  <section class="tabpage" id="tab-progress">
+    <div class="sec-h" style="margin-bottom:12px"><span class="bar r"></span><span class="t">Season Report</span><span class="jp" id="pgPeriod">2026年度</span></div>
+
+    <div class="tiles">
+      <div class="tile"><span class="n t" id="pgSessions">0</span><div class="l">開催</div></div>
+      <div class="tile"><span class="n" id="pgAttend">0</span><div class="l">のべ参加</div></div>
+      <div class="tile"><span class="n r" id="pgTreat">฿0</span><div class="l">男気総額</div></div>
+    </div>
+
+    <div class="card">
+      <div class="sec-h"><span class="bar r"></span><span class="t">Otokogi</span><span class="jp">男気途中経過まとめ</span></div>
+      <div id="pgTreatList"></div>
+    </div>
+
+    <div class="card">
+      <div class="sec-h"><span class="bar"></span><span class="t">Crew</span><span class="jp" id="pgCrewCount">参加者名簿</span></div>
+      <div class="mini" style="margin-bottom:10px">🆕 ＝ 初参加（1回目）／2回以上はリピーター</div>
+      <div id="pgCrewList"></div>
+    </div>
+
+    <div class="card">
+      <button class="cta" id="pgSendBtn"><span>📣 途中経過をDiscordに送る</span></button>
+    </div>
+  </section>
+
   <!-- ===== メンバー TAB ===== -->
   <section class="tabpage" id="tab-crew">
     <div class="card">
@@ -428,12 +454,13 @@
     </div>
   </section>
 
-  <footer>RHIR by Thcc<span class="dot">.</span> — Run. Heat. Ice. Repeat.<br><span style="opacity:.55">Asakatsu Log v1.6</span></footer>
+  <footer>RHIR by Thcc<span class="dot">.</span> — Run. Heat. Ice. Repeat.<br><span style="opacity:.55">Asakatsu Log v1.7</span></footer>
 </div>
 
 <nav>
   <button data-tab="log" class="on"><span class="ic">🔥</span><span class="nl">記録</span></button>
   <button data-tab="stats"><span class="ic">📊</span><span class="nl">統計</span></button>
+  <button data-tab="progress"><span class="ic">📋</span><span class="nl">経過</span></button>
   <button data-tab="crew"><span class="ic">👥</span><span class="nl">メンバー</span></button>
   <button data-tab="config"><span class="ic">⚙︎</span><span class="nl">設定</span></button>
 </nav>
@@ -833,6 +860,89 @@
   document.getElementById("prevMo").onclick=()=>{ const d=parseD(statMonth+"-01"); d.setMonth(d.getMonth()-1); statMonth=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); renderStats(); };
   document.getElementById("nextMo").onclick=()=>{ const d=parseD(statMonth+"-01"); d.setMonth(d.getMonth()+1); statMonth=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); renderStats(); };
 
+  /* ---------- 途中経過 (season progress) ---------- */
+  const SEASON_START="2026-05-20";
+  const SEASON_LABEL="2026年度";
+  function seasonStats(){
+    const ses=sessions.filter(s=>s.date>=SEASON_START).sort((a,b)=> a.date<b.date?-1:1);
+    const attend=ses.reduce((a,s)=>a+s.attendees.length,0);
+    const treat=ses.reduce((a,s)=>a+(s.amount||0),0);
+    const per=roster.map(m=>{
+      const att=ses.filter(s=>s.attendees.includes(m.id)).length;
+      const wins=ses.filter(s=>s.winnerId===m.id);
+      return {id:m.id,name:m.name,att:att,wins:wins.length,treat:wins.reduce((a,s)=>a+(s.amount||0),0)};
+    }).filter(x=>x.att>0);
+    per.sort((a,b)=> b.att-a.att || b.treat-a.treat);
+    return {ses:ses,attend:attend,treat:treat,per:per};
+  }
+  function seasonPeriodLabel(){
+    const s=parseD(SEASON_START), t=parseD(todayStr());
+    return SEASON_LABEL+"（"+(s.getMonth()+1)+"/"+s.getDate()+"〜"+(t.getMonth()+1)+"/"+t.getDate()+"）";
+  }
+  function renderProgress(){
+    const st=seasonStats();
+    document.getElementById("pgPeriod").textContent=seasonPeriodLabel();
+    document.getElementById("pgSessions").textContent=st.ses.length;
+    document.getElementById("pgAttend").textContent=st.attend;
+    document.getElementById("pgTreat").textContent=yen(st.treat);
+
+    // 男気ランキング（年度累計）
+    const tl=document.getElementById("pgTreatList"); tl.innerHTML="";
+    const treats=st.per.filter(x=>x.treat>0).sort((a,b)=>b.treat-a.treat);
+    if(treats.length===0){ tl.innerHTML="<div class='empty'>まだ男気の記録がありません<span class='dot'>。</span></div>"; }
+    else{
+      const max=treats[0].treat;
+      treats.forEach((t,i)=>{
+        const el=document.createElement("div"); el.className="lb-item";
+        el.innerHTML="<div class='lb-rank g"+(i<3?i+1:"")+"'>"+(i+1)+"</div>"+
+          "<div class='lb-body'><div class='lb-name'>"+esc(t.name)+"</div>"+
+          "<div class='lb-bar'><span style='width:"+Math.round(t.treat/max*100)+"%;background:var(--red)'></span></div></div>"+
+          "<div class='lb-val r'>"+yen(t.treat)+"<span style='font-size:11px;opacity:.6'>（"+t.wins+"回）</span></div>";
+        tl.appendChild(el);
+      });
+    }
+
+    // 参加者名簿
+    const cl=document.getElementById("pgCrewList"); cl.innerHTML="";
+    const newbies=st.per.filter(x=>x.att===1).length;
+    document.getElementById("pgCrewCount").textContent="参加者名簿 "+st.per.length+"名（🆕 "+newbies+"名）";
+    if(st.per.length===0){ cl.innerHTML="<div class='empty'>まだ参加記録がありません<span class='dot'>。</span></div>"; }
+    else st.per.forEach(m=>{
+      const el=document.createElement("div"); el.className="lb-item";
+      el.innerHTML="<div class='lb-body'><div class='lb-name'>"+(m.att===1?"🆕 ":"")+esc(m.name)+"</div></div>"+
+        "<div class='lb-val'>"+m.att+"回</div>";
+      cl.appendChild(el);
+    });
+  }
+  function buildProgressMessage(){
+    const st=seasonStats();
+    const lines=[];
+    lines.push("📋 **朝活 途中経過まとめ｜"+seasonPeriodLabel()+"**");
+    lines.push("☀️ 開催 "+st.ses.length+"回｜のべ参加 "+st.attend+"名"+(config.host?"｜主催 "+config.host:""));
+    lines.push("");
+    const treats=st.per.filter(x=>x.treat>0).sort((a,b)=>b.treat-a.treat);
+    lines.push("🥊 **男気途中経過** 総額 "+yen(st.treat));
+    if(treats.length===0) lines.push("　まだ記録なし");
+    else treats.forEach((t,i)=> lines.push((i===0?"🏆":i===1?"🥈":i===2?"🥉":"　")+" "+(i+1)+". "+t.name+"　"+yen(t.treat)+"（"+t.wins+"回）"));
+    lines.push("");
+    const newbies=st.per.filter(x=>x.att===1);
+    lines.push("👥 **参加者名簿** "+st.per.length+"名（🆕初参加 "+newbies.length+"名）");
+    lines.push(st.per.map(m=>(m.att===1?"🆕":"")+m.name+"("+m.att+")").join("・"));
+    lines.push("");
+    lines.push("Run. Heat. Ice. Repeat. — Thcc.");
+    return lines.join("\n");
+  }
+  document.getElementById("pgSendBtn").onclick=function(){
+    const btn=this;
+    if(!effWebhook()){ toast("Webhook未設定。設定タブを確認",'r'); return; }
+    if(!confirm("途中経過まとめをDiscordに投稿しますか？")) return;
+    btn.disabled=true;
+    sendDiscord(buildProgressMessage())
+      .then(()=>toast("途中経過を投稿しました📣",'t'))
+      .catch(()=>toast("投稿失敗⚠️",'r'))
+      .finally(()=>{ btn.disabled=false; });
+  };
+
   /* ---------- crew ---------- */
   function renderCrew(){
     document.getElementById("crewCount").textContent=roster.length? roster.length+"名":"";
@@ -1168,7 +1278,7 @@
     t.textContent=msg; clearTimeout(tt); tt=setTimeout(()=>t.className="toast",2600);
   }
 
-  function refreshAll(){ renderHeader(); renderRecordState(); renderStats(); renderCrew(); }
+  function refreshAll(){ renderHeader(); renderRecordState(); renderStats(); renderProgress(); renderCrew(); }
 
   /* ---------- init ---------- */
   document.getElementById("sesDate").value=todayStr();
