@@ -298,7 +298,7 @@
             <label class="chk-inline"><input type="checkbox" id="newMemberJanken" checked> 男気じゃんけんに参加</label>
             <button class="quick-btn tealtxt" id="confirmAddMember" style="flex:0 0 84px">追加</button>
           </div>
-          <div class="mini">女性・子供など奢り対象外の人はチェックを外して登録<span class="dot">。</span>次回から自動で除外されます。</div>
+          <div class="mini">女性・子供など奢り対象外の人はチェックを外して登録<span class="dot">。</span>次回から自動で除外されます。<br>間違えたときは、メンバーのチップを<b>長押し</b>すると修正・削除できます。</div>
         </div>
 
         <div style="height:18px"></div>
@@ -441,6 +441,19 @@
 <div class="toast" id="toast"></div>
 
 <!-- ===== シェア画像モーダル ===== -->
+<div class="share-ov" id="memberOv">
+  <div class="share-box" style="width:min(340px,92vw)">
+    <div style="font-weight:900;font-size:19px;margin-bottom:12px;text-align:center" id="memberOvName">—</div>
+    <div class="share-btns">
+      <button class="cta teal" id="mvRename"><span>✏️ 名前を修正</span></button>
+      <button class="cta ghost" id="mvJanken"><span>♀/子（じゃんけん除外）を切替</span></button>
+      <button class="cta ghost" id="mvDelete"><span>🗑 メンバーを削除</span></button>
+      <button class="cta ghost" id="mvClose"><span>✕ 閉じる</span></button>
+    </div>
+    <div class="mini" style="text-align:center;margin-top:8px">削除しても過去の記録は残ります<span class="dot">。</span></div>
+  </div>
+</div>
+
 <div class="share-ov" id="shareOv">
   <div class="share-box">
     <img id="sharePrev" alt="シェア画像プレビュー">
@@ -552,11 +565,19 @@
       const el=document.createElement("div");
       el.className="chip"+(attArr.includes(m.id)?" on":"");
       el.innerHTML=esc(m.name)+(m.janken===false?" <span class='cnt'>♀/子</span>":"");
+      let lpTimer=null, lpFired=false;
       el.onclick=()=>{
+        if(lpFired){ lpFired=false; return; }
         if(attArr.includes(m.id)){ attArr=attArr.filter(x=>x!==m.id); jankenArr=jankenArr.filter(x=>x!==m.id); if(winnerId===m.id) winnerId=null; }
         else { attArr.push(m.id); if(eligible(m.id)) jankenArr.push(m.id); }
         renderAtt(); renderJankenPart(); renderWinner();
       };
+      const lpStart=()=>{ lpFired=false; clearTimeout(lpTimer); lpTimer=setTimeout(()=>{ lpFired=true; openMemberEdit(m.id); },550); };
+      const lpCancel=()=>{ clearTimeout(lpTimer); };
+      el.addEventListener("touchstart",lpStart,{passive:true});
+      el.addEventListener("touchend",lpCancel); el.addEventListener("touchmove",lpCancel);
+      el.addEventListener("mousedown",lpStart); el.addEventListener("mouseup",lpCancel); el.addEventListener("mouseleave",lpCancel);
+      el.addEventListener("contextmenu",e=>e.preventDefault());
       c.appendChild(el);
     });
     const add=document.createElement("div");
@@ -832,13 +853,49 @@
   document.getElementById("sortAtt").onclick=function(){ crewSort="att"; this.classList.add("on"); document.getElementById("sortTreat").classList.remove("on"); renderCrew(); };
   document.getElementById("sortTreat").onclick=function(){ crewSort="treat"; this.classList.add("on"); document.getElementById("sortAtt").classList.remove("on"); renderCrew(); };
 
+  /* ---------- member edit modal ---------- */
+  let editMemberId=null;
+  function openMemberEdit(id){
+    const m=roster.find(x=>x.id===id); if(!m) return;
+    editMemberId=id;
+    document.getElementById("memberOvName").textContent=m.name+(m.janken===false?"（♀/子）":"");
+    document.getElementById("memberOv").classList.add("show");
+  }
+  function closeMemberEdit(){ document.getElementById("memberOv").classList.remove("show"); editMemberId=null; }
+  document.getElementById("mvClose").onclick=closeMemberEdit;
+  document.getElementById("mvRename").onclick=()=>{
+    const m=roster.find(x=>x.id===editMemberId); if(!m){ closeMemberEdit(); return; }
+    const nn=prompt("名前を修正", m.name);
+    if(nn&&nn.trim()){ m.name=nn.trim(); jsave(RKEY,roster); refreshAll(); toast("名前を修正しました✏️",'t'); }
+    closeMemberEdit();
+  };
+  document.getElementById("mvJanken").onclick=()=>{
+    const m=roster.find(x=>x.id===editMemberId); if(!m){ closeMemberEdit(); return; }
+    m.janken=(m.janken===false);
+    if(m.janken===false){ jankenArr=jankenArr.filter(x=>x!==m.id); if(winnerId===m.id) winnerId=null; }
+    else if(attArr.includes(m.id)&&!jankenArr.includes(m.id)) jankenArr.push(m.id);
+    jsave(RKEY,roster); refreshAll();
+    toast(m.janken===false?"じゃんけん対象外にしました":"じゃんけん対象に戻しました",'t');
+    closeMemberEdit();
+  };
+  document.getElementById("mvDelete").onclick=()=>{
+    const m=roster.find(x=>x.id===editMemberId); if(!m){ closeMemberEdit(); return; }
+    if(!confirm("「"+m.name+"」を削除しますか？（過去の記録は残ります）")) return;
+    roster=roster.filter(x=>x.id!==m.id);
+    attArr=attArr.filter(x=>x!==m.id); jankenArr=jankenArr.filter(x=>x!==m.id); if(winnerId===m.id) winnerId=null;
+    jsave(RKEY,roster); refreshAll();
+    toast("削除しました🗑");
+    closeMemberEdit();
+  };
+
   /* ---------- Discord ---------- */
   function buildMessage(rec){
     const d=parseD(rec.date);
     const names=rec.attendees.map(memberName);
     const lines=[];
     lines.push("🌅 **朝活 RHIR** "+d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate()+" ("+WD[d.getDay()]+") "+(rec.time||"05:30")+" START");
-    lines.push("🔥 連続"+streakAt(rec.date)+"日目"+(config.host?"｜主催 "+config.host:""));
+    const nth=sessions.filter(s=>s.date.slice(0,7)===rec.date.slice(0,7)&&s.date<=rec.date).length;
+    lines.push("🔥 連続"+streakAt(rec.date)+"日目｜"+(d.getMonth()+1)+"月 "+nth+"回目"+(config.host?"｜主催 "+config.host:""));
     const menu=(rec.phases||["run","hiit","ice"]).map(k=>{const x=MENU.find(m=>m.k===k);return x?x.e+" "+x.l:"";}).filter(Boolean);
     if(menu.length) lines.push("🔁 "+menu.join(" → ")+" → REPEAT");
     lines.push("");
@@ -860,7 +917,7 @@
     const url=effWebhook();
     if(!url) return Promise.reject(new Error("no webhook"));
     const fd=new FormData();
-    fd.append("payload_json", JSON.stringify({content:content, username:"RHIR｜朝活ログ", allowed_mentions:{parse:[]}}));
+    fd.append("payload_json", JSON.stringify({content:content, allowed_mentions:{parse:[]}}));
     return fetch(url,{method:"POST",body:fd}).then(r=>{ if(!r.ok) throw new Error("status "+r.status); });
   }
 
@@ -963,8 +1020,11 @@
       x.fillStyle="rgba(255,58,31,.10)"; x.fillRect(44,top,W-88,bh2);
       x.fillStyle=RED; x.fillRect(44,top,10,bh2);
       x.fillStyle=MUT; x.font="700 30px "+JPFONT; x.fillText("🥊 男気じゃんけん",cx,y);
-      x.fillStyle=RED; x.font="900 58px "+JPFONT;
-      x.fillText("🏆 "+memberName(rec.winnerId)+" が "+yen(rec.amount)+" 奢り！",cx,y+86);
+      x.fillStyle=RED;
+      const wtxt="🏆 "+memberName(rec.winnerId)+" が "+yen(rec.amount)+" 奢り！";
+      let wfs=58; x.font="900 "+wfs+"px "+JPFONT;
+      while(wfs>34 && x.measureText(wtxt).width>W-200){ wfs-=2; x.font="900 "+wfs+"px "+JPFONT; }
+      x.fillText(wtxt,cx,y+86);
       y=top+bh2+60;
     }
     // note（下のSTREAK表示に重なる場合は省略）
@@ -976,7 +1036,7 @@
     let by=H-336;
     x.fillStyle=RED; x.fillRect(cx-40,by-118,80,8);
     x.fillStyle=WHT; x.font="400 100px Anton, sans-serif";
-    x.fillText(String(calcStreak()),cx,by); by+=50;
+    x.fillText(String(streakAt(rec.date)),cx,by); by+=50;
     x.fillStyle=MUT; x.font="700 30px "+JPFONT;
     x.fillText("D A Y   S T R E A K",cx,by); by+=96;
     x.strokeStyle=LINE; x.lineWidth=2;
