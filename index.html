@@ -95,7 +95,7 @@
   .bar.r{background:var(--red)}
 
   label.fld{display:block;font-size:10px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;font-weight:800;margin:0 0 8px}
-  input[type=text],input[type=number],input[type=date],input[type=time],textarea{
+  input[type=text],input[type=number],input[type=date],input[type=time],textarea,select{
     width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:11px;
     padding:13px;font-size:16px;color:var(--white);font-family:inherit;
   }
@@ -418,6 +418,39 @@
     </div>
   </section>
 
+  <!-- ===== マイページ TAB ===== -->
+  <section class="tabpage" id="tab-me">
+    <div class="card">
+      <div class="sec-h"><span class="bar"></span><span class="t">My Page</span><span class="jp">マイページ</span></div>
+      <label class="fld">あなたは誰？（この端末に記憶されます）</label>
+      <select id="meSelect"></select>
+    </div>
+    <div id="meBody" style="display:none">
+      <div class="tiles">
+        <div class="tile"><span class="n t" id="meTotal">0</span><div class="l">通算参加</div></div>
+        <div class="tile"><span class="n" id="meMonth">0</span><div class="l">今月</div></div>
+        <div class="tile"><span class="n r" id="meStreak">0</span><div class="l">連続日数</div></div>
+      </div>
+      <div class="mini" id="meTreat" style="margin:-6px 0 12px;text-align:center"></div>
+      <div class="card">
+        <div class="sec-h"><span class="bar r"></span><span class="t">Today</span><span class="jp">きょうのきぶん・一言</span></div>
+        <div class="toggle-row" id="meMoodRow">
+          <button data-mood="😄">😄</button><button data-mood="🙂">🙂</button><button data-mood="😐">😐</button><button data-mood="😴">😴</button><button data-mood="🤕">🤕</button>
+        </div>
+        <input type="text" id="meMemoText" placeholder="一言メモ（任意）" style="margin-top:10px">
+        <button class="cta teal" id="meMemoSave" style="margin-top:10px"><span>✍️ きょうの記録を残す</span></button>
+      </div>
+      <div class="card">
+        <div class="sec-h"><span class="bar"></span><span class="t">Calendar</span><span class="jp" id="meCalLabel">参加カレンダー</span></div>
+        <div id="meCal" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:14px"></div>
+      </div>
+      <div class="card">
+        <div class="sec-h"><span class="bar r"></span><span class="t">Diary</span><span class="jp">これまでのメモ</span></div>
+        <div id="meDiary"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- ===== メンバー TAB ===== -->
   <section class="tabpage" id="tab-crew">
     <div class="card">
@@ -481,11 +514,12 @@
     </div>
   </section>
 
-  <footer>RHIR by Thcc<span class="dot">.</span> — Run. Heat. Ice. Repeat.<br><span style="opacity:.55">Asakatsu Earth v2.1 ☁️</span></footer>
+  <footer>RHIR by Thcc<span class="dot">.</span> — Run. Heat. Ice. Repeat.<br><span style="opacity:.55">Asakatsu Earth v2.2 ☁️</span></footer>
 </div>
 
 <nav>
   <button data-tab="log" class="on"><span class="ic">🔥</span><span class="nl">記録</span></button>
+  <button data-tab="me"><span class="ic">👤</span><span class="nl">マイ</span></button>
   <button data-tab="stats"><span class="ic">📊</span><span class="nl">統計</span></button>
   <button data-tab="progress"><span class="ic">📋</span><span class="nl">経過</span></button>
   <button data-tab="crew"><span class="ic">👥</span><span class="nl">メンバー</span></button>
@@ -552,7 +586,7 @@
   function jsave(k,v){ localStorage.setItem(k, JSON.stringify(v)); cloudPush(k,v); }
   // ---- 削除の記録（マージ同期で、消した記録が他の端末から復活しないように） ----
   var TOMBKEY="thcc_tombs_v1";
-  var tombs=jload(TOMBKEY,{s:{},m:{}}); if(!tombs.s)tombs.s={}; if(!tombs.m)tombs.m={};
+  var tombs=jload(TOMBKEY,{s:{},m:{},p:{}}); if(!tombs.s)tombs.s={}; if(!tombs.m)tombs.m={}; if(!tombs.p)tombs.p={};
   function saveTombs(){ localStorage.setItem(TOMBKEY, JSON.stringify(tombs)); }
   function tombSession(key){ tombs.s[key]=new Date().toISOString(); saveTombs(); }
   function tombMember(id){ tombs.m[id]=new Date().toISOString(); saveTombs(); }
@@ -578,6 +612,9 @@
   let roster   = jload(RKEY, []);            // [{id,name}]
   let sessions = jload(TKEY, []);            // [{date,site,recorder,time,attendees:[id],jankenIds:[id],winnerId,amount,phases,note,checkin,savedAt}]
   let config   = jload(CKEY, {host:"",webhook:"",auto:false});
+  // ---- マイページ（自分・個人メモ） ----
+  const MEKEY="thcc_me_v1", MKEY="thcc_memos_v1";
+  let memos = jload(MKEY, []);               // [{id:member@date, member, date, mood, text, savedAt}]
 
   // ---- 拠点・入力者 ----
   const SITEKEY="thcc_site_v1", RECRKEY="thcc_recorder_v1", DEFAULT_SITE="Bangkok";
@@ -626,6 +663,14 @@
     let n=0, cur=parseD(dateStr);
     while(set.has(ymd(cur))){ n++; cur.setDate(cur.getDate()-1); }
     return n;
+  }
+  // 記録に使われた拠点を候補リストに自動追加（一度使えば次から選べる）
+  const SITE_PRESETS=["Bangkok","KL","Danang","Osaka","Kanagawa"];
+  function renderSiteList(){
+    const el=document.getElementById("siteList"); if(!el) return;
+    const set=new Set(SITE_PRESETS);
+    sessions.forEach(s=>{ if(s.site) set.add(s.site); });
+    el.innerHTML=[...set].map(s=>"<option value=\""+esc(s)+"\"></option>").join("");
   }
   function calcStreak(){
     const set=new Set(sessions.map(s=>s.date));
@@ -1420,7 +1465,71 @@
     t.textContent=msg; clearTimeout(tt); tt=setTimeout(()=>t.className="toast",2600);
   }
 
-  function refreshAll(){ renderHeader(); renderRecordState(); renderStats(); renderProgress(); renderCrew(); }
+  /* ---------- マイページ ---------- */
+  let meMood=null;
+  function meId(){ return localStorage.getItem(MEKEY)||""; }
+  function renderMoodRow(){
+    document.querySelectorAll("#meMoodRow button").forEach(b=>b.classList.toggle("on",b.getAttribute("data-mood")===meMood));
+  }
+  function renderMe(){
+    const sel=document.getElementById("meSelect"); if(!sel) return;
+    const cur=meId();
+    sel.innerHTML="<option value=''>— 名簿から選んでください —</option>"+
+      [...roster].sort((a,b)=>a.name<b.name?-1:1).map(m=>"<option value=\""+m.id+"\""+(m.id===cur?" selected":"")+">"+esc(m.name)+"</option>").join("");
+    const me=roster.find(m=>m.id===cur);
+    document.getElementById("meBody").style.display = me? "block":"none";
+    if(!me) return;
+    const mine=sessions.filter(s=>s.attendees.includes(cur));
+    document.getElementById("meTotal").textContent=mine.length;
+    const ym=todayStr().slice(0,7);
+    document.getElementById("meMonth").textContent=mine.filter(s=>s.date.startsWith(ym)).length;
+    // 個人の連続日数（どこの拠点でもOK）
+    const days=new Set(mine.map(s=>s.date));
+    let n=0,curD=new Date(); if(!days.has(ymd(curD))) curD.setDate(curD.getDate()-1);
+    while(days.has(ymd(curD))){ n++; curD.setDate(curD.getDate()-1); }
+    document.getElementById("meStreak").textContent=n;
+    const treats=mine.filter(s=>s.winnerId===cur);
+    document.getElementById("meTreat").textContent="🥊 男気："+treats.length+"回 ・ 累計 "+yen(treats.reduce((a,s)=>a+(s.amount||0),0));
+    // 参加カレンダー（今月）
+    const t=new Date(), y=t.getFullYear(), mo=t.getMonth();
+    const first=new Date(y,mo,1), dim=new Date(y,mo+1,0).getDate();
+    document.getElementById("meCalLabel").textContent=(mo+1)+"月の参加カレンダー";
+    let html=WD.map(w=>"<div class='mini'>"+w+"</div>").join("");
+    for(let i=0;i<first.getDay();i++) html+="<div></div>";
+    for(let d=1;d<=dim;d++){
+      const ds=y+"-"+String(mo+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
+      const on=days.has(ds);
+      html+="<div style='padding:7px 0;border-radius:8px;"+(on?"background:rgba(61,214,181,.16);color:var(--teal);font-weight:800":"opacity:.4")+"'>"+d+"</div>";
+    }
+    document.getElementById("meCal").innerHTML=html;
+    // きょうのメモ（保存済みなら呼び出し）
+    const todayMemo=memos.find(x=>x.id===cur+"@"+todayStr());
+    if(todayMemo){ meMood=todayMemo.mood||null; document.getElementById("meMemoText").value=todayMemo.text||""; }
+    renderMoodRow();
+    // メモ履歴
+    const mineMemos=memos.filter(x=>x.member===cur).sort((a,b)=>a.date<b.date?1:-1).slice(0,14);
+    document.getElementById("meDiary").innerHTML = mineMemos.length?
+      mineMemos.map(x=>"<div class='mini' style='padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06)'>"+esc(x.date)+"　"+esc(x.mood||"")+" "+esc(x.text||"")+"</div>").join("")
+      : "<div class='mini'>まだメモがありません。今日のきぶんから始めましょう。</div>";
+  }
+  document.getElementById("meSelect").onchange=function(){
+    localStorage.setItem(MEKEY,this.value); meMood=null;
+    const mt=document.getElementById("meMemoText"); if(mt) mt.value="";
+    renderMe();
+  };
+  document.querySelectorAll("#meMoodRow button").forEach(b=>b.onclick=()=>{ meMood=b.getAttribute("data-mood"); renderMoodRow(); });
+  document.getElementById("meMemoSave").onclick=function(){
+    const cur=meId(); if(!cur){ toast("先に自分の名前を選んでください",'r'); return; }
+    const text=document.getElementById("meMemoText").value.trim();
+    if(!meMood && !text){ toast("きぶんか一言、どちらかを入れてください"); return; }
+    const id=cur+"@"+todayStr();
+    memos=memos.filter(x=>x.id!==id);
+    memos.push({id, member:cur, date:todayStr(), mood:meMood||"", text, savedAt:new Date().toISOString()});
+    jsave(MKEY,memos);
+    renderMe(); toast("きょうの記録を残しました✍️",'t');
+  };
+
+  function refreshAll(){ renderHeader(); renderRecordState(); renderStats(); renderProgress(); renderCrew(); renderSiteList(); renderMe(); }
 
   /* ---------- cloud sync (Firebase Firestore / v2.1 マージ方式) ----------
      v2.0の「配列まるごと上書き」で古い端末が新しい記録を消す事故が起きたため、
@@ -1429,10 +1538,10 @@
      ・削除は tombstone（削除時刻の記録）で伝搬し、古いデータから復活しない
      ・どの端末に残っているデータも、開いた瞬間にクラウドへ合流して復元される */
   var db=null;
-  var CLOUD_DOCS={}; CLOUD_DOCS[RKEY]="roster"; CLOUD_DOCS[TKEY]="sessions";
+  var CLOUD_DOCS={}; CLOUD_DOCS[RKEY]="roster"; CLOUD_DOCS[TKEY]="sessions"; CLOUD_DOCS[MKEY]="memos";
   function keyOf(k,r){ return k===TKEY ? skey(r) : r.id; }
   function timeOf(r){ return r.savedAt || r.updatedAt || ""; }
-  function tombOf(k){ return k===TKEY ? tombs.s : tombs.m; }
+  function tombOf(k){ return k===TKEY ? tombs.s : (k===RKEY ? tombs.m : tombs.p); }
   function canonArr(k,arr){ return JSON.stringify([...(arr||[])].sort((a,b)=> keyOf(k,a)<keyOf(k,b)?-1:1)); }
   function canonTomb(t){ return JSON.stringify(Object.keys(t||{}).sort().map(x=>[x,t[x]])); }
   function mergeArr(k,local,remote){
@@ -1478,14 +1587,14 @@
             const myTomb=tombOf(k);
             const mergedTomb=mergeTombs(myTomb,rtombs);
             const tombChangedLocally = canonTomb(mergedTomb)!==canonTomb(myTomb);
-            if(k===TKEY) tombs.s=mergedTomb; else tombs.m=mergedTomb;
+            if(k===TKEY) tombs.s=mergedTomb; else if(k===RKEY) tombs.m=mergedTomb; else tombs.p=mergedTomb;
             if(tombChangedLocally) saveTombs();
             // 2) データを合体（新しい方が勝つ・削除済みは復活しない）
             const local=jload(k,[]);
             const merged=mergeArr(k,local,remote);
             // 3) この端末に反映
             if(canonArr(k,merged)!==canonArr(k,local)){
-              if(k===RKEY) roster=merged; else sessions=merged;
+              if(k===RKEY) roster=merged; else if(k===TKEY) sessions=merged; else memos=merged;
               localStorage.setItem(k, JSON.stringify(merged));
               refreshAll();
               setCloudStatus("☁️ 同期OK（最終受信 "+new Date().toLocaleTimeString("ja-JP")+"）",true);
