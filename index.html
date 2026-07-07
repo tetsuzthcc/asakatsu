@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>RHIR — 朝活ログ / Thcc.</title>
+<title>朝活地球 Asakatsu Earth / Thcc.</title>
 <!-- PWA: ホーム画面に追加でアプリとして起動 -->
 <meta name="theme-color" content="#0a0b0d">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="朝活記録">
+<meta name="apple-mobile-web-app-title" content="朝活地球">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -255,9 +255,9 @@
         <div class="brand">Thcc<span class="dot">.</span><span class="reg">®</span></div>
         <div class="tagline">RUN<span class="s">/</span><span class="accent-t">HEAT</span><span class="s">/</span><span class="accent-r">ICE</span><span class="s">/</span>REPEAT<span class="dot">.</span></div>
         <div class="hxh">
-          <div class="yomi">アサカツキロク</div>
-          <div class="kanji">朝活記録<span class="dot">。</span></div>
-          <div class="romaji">Asakatsu Log</div>
+          <div class="yomi">アサカツチキュウ</div>
+          <div class="kanji">朝活地球<span class="dot">。</span></div>
+          <div class="romaji">Asakatsu Earth</div>
         </div>
         <div class="subjp">Bangkok Morning Club<span class="dot">。</span></div>
       </div>
@@ -285,6 +285,17 @@
           <div><label class="fld">Date</label><input type="date" id="sesDate"></div>
           <div><label class="fld">Start</label><input type="time" id="sesTime" value="05:30"></div>
         </div>
+        <div class="row2" style="margin-bottom:14px">
+          <div><label class="fld">📍 拠点</label><input type="text" id="sesSite" placeholder="例：Bangkok" list="siteList"></div>
+          <div><label class="fld">✍️ 入力者</label><input type="text" id="sesRecorder" placeholder="あなたの名前"></div>
+        </div>
+        <datalist id="siteList">
+          <option value="Bangkok"></option>
+          <option value="KL"></option>
+          <option value="Danang"></option>
+          <option value="Osaka"></option>
+          <option value="Kanagawa"></option>
+        </datalist>
 
         <label class="fld">Attendance / 参加メンバー <span id="attCount" class="accent-t"></span></label>
         <div class="quick-row">
@@ -380,6 +391,7 @@
       <div class="tile"><span class="n" id="pgAttend">0</span><div class="l">のべ参加</div></div>
       <div class="tile"><span class="n r" id="pgTreat">฿0</span><div class="l">男気総額</div></div>
     </div>
+    <div class="mini" id="pgSites" style="margin:-6px 0 12px;text-align:center"></div>
 
     <div class="card">
       <div class="sec-h"><span class="bar r"></span><span class="t">Otokogi</span><span class="jp">男気途中経過まとめ</span></div>
@@ -439,6 +451,12 @@
     </div>
 
     <div class="card">
+      <div class="sec-h"><span class="bar"></span><span class="t">Cloud</span><span class="jp">みんなで共有</span></div>
+      <div class="hint">Firebase設定済みなら、メンバーと記録が全員のスマホで自動同期されます。</div>
+      <div class="mini" id="cloudStatus" style="margin-top:8px">—</div>
+    </div>
+
+    <div class="card">
       <div class="sec-h"><span class="bar"></span><span class="t">Backup</span><span class="jp">引き継ぎ・バックアップ</span></div>
       <div class="hint" style="margin-bottom:12px">不在の日に誰かへ引き継ぐときは「書き出し」でファイルを渡し、相手が「読み込み」すればメンバーと記録がそのまま移ります。</div>
       <div class="row2">
@@ -454,7 +472,7 @@
     </div>
   </section>
 
-  <footer>RHIR by Thcc<span class="dot">.</span> — Run. Heat. Ice. Repeat.<br><span style="opacity:.55">Asakatsu Log v1.7</span></footer>
+  <footer>RHIR by Thcc<span class="dot">.</span> — Run. Heat. Ice. Repeat.<br><span style="opacity:.55">Asakatsu Earth v2.0 ☁️</span></footer>
 </div>
 
 <nav>
@@ -494,6 +512,8 @@
   </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
 (function(){
   "use strict";
@@ -505,11 +525,22 @@
      ============================================================ */
   const BUILTIN_WEBHOOK = "https://discord.com/api/webhooks/1522897352799555675/0Q4z-UnMloQJDg5Oc19WNAQ3K8YT9A31BN__PrkGLC0g-M_AWBF0AOLYDCgLim2ysXrf";
 
+  /* ここにFirebaseの設定を貼ると、全員のスマホでデータが自動共有されます
+     例: const FIREBASE_CONFIG = { apiKey:"...", authDomain:"...", projectId:"...", ... }; */
+  const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyBCW4JYSgoYVOciqSxUr_uNPeNc-uo6BhY",
+    authDomain: "asakatsu-34e6a.firebaseapp.com",
+    projectId: "asakatsu-34e6a",
+    storageBucket: "asakatsu-34e6a.firebasestorage.app",
+    messagingSenderId: "501373403710",
+    appId: "1:501373403710:web:4c0e7f076c561c1957076f"
+  };
+
   const RKEY="thcc_roster_v1", TKEY="thcc_sessions_v1", CKEY="thcc_config_v1";
 
   // ---- storage ----
   function jload(k,f){ try{ return JSON.parse(localStorage.getItem(k)) ?? f; }catch(e){ return f; } }
-  function jsave(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
+  function jsave(k,v){ localStorage.setItem(k, JSON.stringify(v)); cloudPush(k,v); }
   // ---- 初期データ（初回起動時のみ自動投入：5/17〜6/20の記録） ----
   const SEED = {"roster":[{"id":"m19f2c5442aace286","name":"Nori","janken":true},{"id":"m19f2c5442ab1cf90","name":"Tetsu","janken":true},{"id":"m19f2c5442acc5310","name":"Sato","janken":true},{"id":"m19f2c5442ad159c20","name":"Kurasaka","janken":true},{"id":"m19f2c5442ae17892b","name":"Fukumi","janken":true},{"id":"m19f2c5442af1932e","name":"Kenji","janken":true},{"id":"m19f2c5442b0161efc","name":"Masa","janken":true},{"id":"m19f2c5442b112c96b","name":"Shota","janken":true},{"id":"m19f2c5442b250436","name":"Riko","janken":true},{"id":"m19f2c5442b315a6ff","name":"Gen","janken":true},{"id":"m19f2c5442b486606","name":"Jitaro","janken":true},{"id":"m19f2c5442b51689f1","name":"Yamasaki","janken":true},{"id":"m19f2c5442b62c0a3","name":"T2","janken":true},{"id":"m19f2c5442b7e71ed","name":"Seiya","janken":true},{"id":"m19f2c5442b814ffd6","name":"Sosuke","janken":true},{"id":"m19f2c5442b9b2e80","name":"Shun","janken":true},{"id":"m19f2c5442ba4015d","name":"Umeda","janken":true},{"id":"m19f2c5442bb114add","name":"Dean","janken":true},{"id":"m19f2c5442bc77b6e","name":"Nakajima","janken":true},{"id":"m19f2c5442bd16d117","name":"Su","janken":true}],"sessions":[{"date":"2026-06-20","time":"05:30","attendees":["m19f2c5442ad159c20","m19f2c5442ab1cf90","m19f2c5442b112c96b","m19f2c5442af1932e","m19f2c5442b250436"],"jankenIds":["m19f2c5442ad159c20","m19f2c5442ab1cf90","m19f2c5442b112c96b","m19f2c5442af1932e","m19f2c5442b250436"],"winnerId":"m19f2c5442ad159c20","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-19","time":"05:30","attendees":["m19f2c5442ad159c20","m19f2c5442b315a6ff","m19f2c5442ab1cf90"],"jankenIds":["m19f2c5442ad159c20","m19f2c5442b315a6ff","m19f2c5442ab1cf90"],"winnerId":"m19f2c5442b315a6ff","amount":300,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-18","time":"05:30","attendees":["m19f2c5442ba4015d","m19f2c5442b486606","m19f2c5442ad159c20","m19f2c5442ab1cf90"],"jankenIds":["m19f2c5442ba4015d","m19f2c5442b486606","m19f2c5442ad159c20","m19f2c5442ab1cf90"],"winnerId":"m19f2c5442ad159c20","amount":300,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-17","time":"05:30","attendees":["m19f2c5442ba4015d","m19f2c5442aace286","m19f2c5442af1932e","m19f2c5442b486606","m19f2c5442ab1cf90"],"jankenIds":["m19f2c5442ba4015d","m19f2c5442aace286","m19f2c5442af1932e","m19f2c5442b486606","m19f2c5442ab1cf90"],"winnerId":"m19f2c5442ba4015d","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-16","time":"05:30","attendees":["m19f2c5442ad159c20","m19f2c5442ab1cf90"],"jankenIds":["m19f2c5442ad159c20","m19f2c5442ab1cf90"],"winnerId":null,"amount":0,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-15","time":"05:30","attendees":["m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442ab1cf90","m19f2c5442aace286","m19f2c5442bd16d117","m19f2c5442af1932e","m19f2c5442b486606"],"jankenIds":["m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442ab1cf90","m19f2c5442aace286","m19f2c5442bd16d117","m19f2c5442af1932e","m19f2c5442b486606"],"winnerId":"m19f2c5442acc5310","amount":500,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-14","time":"05:30","attendees":["m19f2c5442acc5310","m19f2c5442ab1cf90","m19f2c5442ba4015d","m19f2c5442b315a6ff","m19f2c5442bb114add","m19f2c5442bc77b6e"],"jankenIds":["m19f2c5442acc5310","m19f2c5442ab1cf90","m19f2c5442ba4015d","m19f2c5442b315a6ff","m19f2c5442bb114add","m19f2c5442bc77b6e"],"winnerId":"m19f2c5442bc77b6e","amount":0,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-13","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442ad159c20","m19f2c5442af1932e","m19f2c5442b315a6ff"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442ad159c20","m19f2c5442af1932e","m19f2c5442b315a6ff"],"winnerId":"m19f2c5442b315a6ff","amount":0,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-12","time":"05:30","attendees":["m19f2c5442aace286","m19f2c5442b486606","m19f2c5442b112c96b","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442aace286","m19f2c5442b486606","m19f2c5442b112c96b","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"winnerId":"m19f2c5442ab1cf90","amount":0,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-11","time":"05:30","attendees":["m19f2c5442af1932e","m19f2c5442aace286","m19f2c5442b250436","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442af1932e","m19f2c5442aace286","m19f2c5442b250436","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"winnerId":"m19f2c5442aace286","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-10","time":"05:30","attendees":["m19f2c5442b7e71ed","m19f2c5442b814ffd6","m19f2c5442b9b2e80","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442b7e71ed","m19f2c5442b814ffd6","m19f2c5442b9b2e80","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"winnerId":"m19f2c5442b7e71ed","amount":0,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-09","time":"05:30","attendees":["m19f2c5442b486606","m19f2c5442af1932e","m19f2c5442b250436","m19f2c5442b112c96b","m19f2c5442b7e71ed","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442aace286"],"jankenIds":["m19f2c5442b486606","m19f2c5442af1932e","m19f2c5442b250436","m19f2c5442b112c96b","m19f2c5442b7e71ed","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442aace286"],"winnerId":"m19f2c5442b112c96b","amount":550,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-08","time":"05:30","attendees":["m19f2c5442b486606","m19f2c5442b51689f1","m19f2c5442b62c0a3","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442b486606","m19f2c5442b51689f1","m19f2c5442b62c0a3","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"winnerId":"m19f2c5442ab1cf90","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-07","time":"05:30","attendees":["m19f2c5442af1932e","m19f2c5442b250436","m19f2c5442aace286","m19f2c5442b486606","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442af1932e","m19f2c5442b250436","m19f2c5442aace286","m19f2c5442b486606","m19f2c5442ad159c20"],"winnerId":"m19f2c5442af1932e","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-06","time":"05:30","attendees":["m19f2c5442af1932e","m19f2c5442b250436","m19f2c5442b315a6ff","m19f2c5442aace286","m19f2c5442b486606","m19f2c5442ab1cf90","m19f2c5442ad159c20","m19f2c5442b112c96b"],"jankenIds":["m19f2c5442af1932e","m19f2c5442b250436","m19f2c5442b315a6ff","m19f2c5442aace286","m19f2c5442b486606","m19f2c5442ab1cf90","m19f2c5442ad159c20","m19f2c5442b112c96b"],"winnerId":"m19f2c5442ab1cf90","amount":300,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-05","time":"05:30","attendees":["m19f2c5442b112c96b","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442b112c96b","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"winnerId":"m19f2c5442ad159c20","amount":300,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-04","time":"05:30","attendees":["m19f2c5442aace286","m19f2c5442ab1cf90","m19f2c5442acc5310"],"jankenIds":["m19f2c5442aace286","m19f2c5442ab1cf90","m19f2c5442acc5310"],"winnerId":"m19f2c5442acc5310","amount":0,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-03","time":"05:30","attendees":["m19f2c5442ae17892b","m19f2c5442af1932e","m19f2c5442aace286","m19f2c5442b0161efc","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442ae17892b","m19f2c5442af1932e","m19f2c5442aace286","m19f2c5442b0161efc","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"winnerId":"m19f2c5442ae17892b","amount":500,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-02","time":"05:30","attendees":["m19f2c5442aace286","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442aace286","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"winnerId":"m19f2c5442ab1cf90","amount":300,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-06-01","time":"05:30","attendees":["m19f2c5442aace286","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442aace286","m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"winnerId":"m19f2c5442ab1cf90","amount":300,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-31","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"winnerId":"m19f2c5442ad159c20","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-30","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286","m19f2c5442af1932e","m19f2c5442b486606"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286","m19f2c5442af1932e","m19f2c5442b486606"],"winnerId":"m19f2c5442af1932e","amount":600,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-29","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"winnerId":"m19f2c5442ab1cf90","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-28","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"winnerId":"m19f2c5442acc5310","amount":300,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-27","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286","m19f2c5442b112c96b"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286","m19f2c5442b112c96b"],"winnerId":"m19f2c5442b112c96b","amount":500,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-26","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"winnerId":"m19f2c5442ab1cf90","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-25","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286","m19f2c5442b486606"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286","m19f2c5442b486606"],"winnerId":"m19f2c5442b486606","amount":500,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-24","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"winnerId":"m19f2c5442ad159c20","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-23","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286","m19f2c5442b315a6ff"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286","m19f2c5442b315a6ff"],"winnerId":"m19f2c5442b315a6ff","amount":500,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-22","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"winnerId":"m19f2c5442acc5310","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-21","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286","m19f2c5442af1932e"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286","m19f2c5442af1932e"],"winnerId":"m19f2c5442ab1cf90","amount":500,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-20","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"winnerId":"m19f2c5442ab1cf90","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-19","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20","m19f2c5442aace286"],"winnerId":"m19f2c5442aace286","amount":400,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-18","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"winnerId":"m19f2c5442ab1cf90","amount":300,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"},{"date":"2026-05-17","time":"05:30","attendees":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"jankenIds":["m19f2c5442ab1cf90","m19f2c5442acc5310","m19f2c5442ad159c20"],"winnerId":"m19f2c5442ab1cf90","amount":300,"phases":["run","hiit","ice"],"note":"","checkin":null,"savedAt":"2026-07-04T09:00:00.000Z"}]};
   const SEEDV="thcc_seed_v2";
@@ -528,8 +559,17 @@
   }
 
   let roster   = jload(RKEY, []);            // [{id,name}]
-  let sessions = jload(TKEY, []);            // [{date,time,attendees:[id],jankenIds:[id],winnerId,amount,phases,note,checkin,savedAt}]
+  let sessions = jload(TKEY, []);            // [{date,site,recorder,time,attendees:[id],jankenIds:[id],winnerId,amount,phases,note,checkin,savedAt}]
   let config   = jload(CKEY, {host:"",webhook:"",auto:false});
+
+  // ---- 拠点・入力者 ----
+  const SITEKEY="thcc_site_v1", RECRKEY="thcc_recorder_v1", DEFAULT_SITE="Bangkok";
+  function normSessions(arr){ (arr||[]).forEach(s=>{ if(!s.site) s.site=DEFAULT_SITE; if(s.recorder==null) s.recorder=""; }); return arr; }
+  normSessions(sessions);
+  function skey(s){ return s.date+"@"+(s.site||DEFAULT_SITE); }
+  function findRec(date,site){ return sessions.find(s=>s.date===date && (s.site||DEFAULT_SITE)===site); }
+  function curSite(){ const el=document.getElementById("sesSite"); const v=el&&el.value.trim(); return v || localStorage.getItem(SITEKEY) || DEFAULT_SITE; }
+  function curRecorder(){ const el=document.getElementById("sesRecorder"); const v=el&&el.value.trim(); return v || localStorage.getItem(RECRKEY) || ""; }
 
   const uid=()=> "m"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
   const WD=["日","月","火","水","木","金","土"];
@@ -550,6 +590,7 @@
   let phases=["run","hiit","ice"];
   let checkin=null;
   let editingDate=null;
+  let editingSite=null;
   function eligible(id){ const m=roster.find(x=>x.id===id); return m ? m.janken!==false : false; }
   let statMonth=(function(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); })();
   let crewSort="att";
@@ -561,8 +602,9 @@
     document.getElementById("hdrTime").innerHTML=(config.defaultTime||"05:30")+"<small> START</small>";
     document.getElementById("streakN").textContent=calcStreak();
   }
-  function streakAt(dateStr){
-    const set=new Set(sessions.map(s=>s.date));
+  function streakAt(dateStr,site){
+    const src=site? sessions.filter(s=>(s.site||DEFAULT_SITE)===site) : sessions;
+    const set=new Set(src.map(s=>s.date));
     let n=0, cur=parseD(dateStr);
     while(set.has(ymd(cur))){ n++; cur.setDate(cur.getDate()-1); }
     return n;
@@ -679,15 +721,19 @@
   document.getElementById("saveBtn").onclick=function(){
     const date = editingDate || document.getElementById("sesDate").value || todayStr();
     const time = document.getElementById("sesTime").value || "05:30";
+    const site = (editingSite!=null? editingSite : curSite()) || DEFAULT_SITE;
+    const recorder = curRecorder();
     if(attArr.length===0){ toast("参加メンバーを選んでください",'r'); return; }
-    if(!editingDate && sessions.some(s=>s.date===date)){
+    if(!editingDate && findRec(date,site)){
       const dd=parseD(date);
-      if(!confirm((dd.getMonth()+1)+"/"+dd.getDate()+" には既に記録があります。上書きしますか？")) return;
+      if(!confirm((dd.getMonth()+1)+"/"+dd.getDate()+"（"+site+"）には既に記録があります。上書きしますか？")) return;
     }
+    localStorage.setItem(SITEKEY, site);
+    if(recorder) localStorage.setItem(RECRKEY, recorder);
     const amount = parseInt(document.getElementById("treatAmount").value,10) || 0;
     const hasWinner = winnerId && jankenArr.includes(winnerId);
     const rec={
-      date, time,
+      date, time, site, recorder,
       attendees: attArr.slice(),
       jankenIds: jankenArr.slice(),
       winnerId: hasWinner? winnerId : null,
@@ -698,7 +744,7 @@
       savedAt: new Date().toISOString()
     };
     const wasEditing=!!editingDate;
-    sessions = sessions.filter(s=>s.date!==rec.date);
+    sessions = sessions.filter(s=>skey(s)!==skey(rec));
     sessions.push(rec);
     sessions.sort((a,b)=>b.date.localeCompare(a.date));
     jsave(TKEY,sessions);
@@ -713,9 +759,9 @@
     switchTab('log');
   };
 
-  document.getElementById("editTodayBtn").onclick=()=> startEdit(todayStr());
+  document.getElementById("editTodayBtn").onclick=()=> startEdit(todayStr(), curSite());
   document.getElementById("sendTodayBtn").onclick=function(){
-    const rec=sessions.find(s=>s.date===todayStr());
+    const rec=findRec(todayStr(),curSite()) || sessions.find(s=>s.date===todayStr());
     if(!rec){ toast("今日の記録がありません",'r'); return; }
     if(!effWebhook()){ toast("Webhook未設定。設定タブを確認",'r'); switchTab('config'); return; }
     const btn=this; btn.disabled=true;
@@ -731,7 +777,7 @@
   function showNewBanner(date){
     const b=document.getElementById("editBanner"); const d=parseD(date);
     b.style.display="block";
-    b.textContent="🆕 "+(d.getMonth()+1)+"/"+d.getDate()+" ("+WD[d.getDay()]+") の記録を入力中";
+    b.textContent="🆕 "+(d.getMonth()+1)+"/"+d.getDate()+" ("+WD[d.getDay()]+")｜📍"+curSite()+" の記録を入力中";
   }
   function updateSaveLabel(){
     const date=editingDate||document.getElementById("sesDate").value||todayStr();
@@ -740,21 +786,35 @@
   }
   document.getElementById("sesDate").onchange=function(){
     const v=this.value; if(!v) return;
-    const s=sessions.find(x=>x.date===v);
-    if(s){ startEdit(v); }
+    const s=findRec(v,curSite());
+    if(s){ startEdit(v,s.site); }
     else{
       // 未記録の日 → 新規入力モード（入力内容は保持）
-      if(editingDate) editingDate=null;
+      if(editingDate){ editingDate=null; editingSite=null; }
       if(v!==todayStr()){ freeEntry=true; showNewBanner(v); }
       else document.getElementById("editBanner").style.display="none";
       updateSaveLabel();
     }
   };
+  document.getElementById("sesSite").onchange=function(){
+    const v=this.value.trim(); if(v) localStorage.setItem(SITEKEY,v);
+    if(!editingDate){
+      const d=document.getElementById("sesDate").value||todayStr();
+      const s=findRec(d,curSite());
+      if(s) startEdit(d,s.site);
+      else renderRecordState();
+    }
+  };
+  document.getElementById("sesRecorder").onchange=function(){
+    const v=this.value.trim(); if(v) localStorage.setItem(RECRKEY,v);
+  };
 
   function resetForm(){
-    attArr=[]; jankenArr=[]; winnerId=null; phases=["run","hiit","ice"]; checkin=null; editingDate=null;
+    attArr=[]; jankenArr=[]; winnerId=null; phases=["run","hiit","ice"]; checkin=null; editingDate=null; editingSite=null;
     document.getElementById("sesDate").value=todayStr();
     document.getElementById("sesTime").value=config.defaultTime||"05:30";
+    document.getElementById("sesSite").value=localStorage.getItem(SITEKEY)||DEFAULT_SITE;
+    document.getElementById("sesRecorder").value=localStorage.getItem(RECRKEY)||config.host||"";
     document.getElementById("treatAmount").value="";
     document.getElementById("sesNote").value="";
     document.getElementById("geoMini").textContent="";
@@ -765,14 +825,17 @@
   }
   let freeEntry=false;
   function renderRecordState(){
-    const done = sessions.some(s=>s.date===todayStr()) && !editingDate && !freeEntry;
+    const done = !!findRec(todayStr(),curSite()) && !editingDate && !freeEntry;
     document.getElementById("doneState").style.display = done? "block":"none";
     document.getElementById("formArea").style.display = done? "none":"block";
     if(!done){ renderMenu(); renderAtt(); renderJankenPart(); renderWinner(); }
   }
-  function startEdit(date){
-    const s=sessions.find(x=>x.date===date); if(!s) return;
-    editingDate=date;
+  function startEdit(date,site){
+    const s= site!=null? findRec(date,site) : sessions.find(x=>x.date===date);
+    if(!s) return;
+    editingDate=date; editingSite=s.site||DEFAULT_SITE;
+    document.getElementById("sesSite").value=editingSite;
+    document.getElementById("sesRecorder").value=s.recorder||localStorage.getItem(RECRKEY)||"";
     attArr=s.attendees.filter(id=>roster.find(m=>m.id===id));
     jankenArr=(s.jankenIds||attArr.filter(eligible)).filter(id=>attArr.includes(id));
     winnerId=s.winnerId||null;
@@ -784,7 +847,7 @@
     document.getElementById("sesNote").value=s.note||"";
     document.getElementById("geoMini").textContent = checkin? ("✅ 位置あり：緯度 "+checkin.lat+" / 経度 "+checkin.lng):"";
     const b=document.getElementById("editBanner"); b.style.display="block";
-    const d=parseD(date); b.textContent="✏️ "+(d.getMonth()+1)+"/"+d.getDate()+" ("+WD[d.getDay()]+") を編集中";
+    const d=parseD(date); b.textContent="✏️ "+(d.getMonth()+1)+"/"+d.getDate()+" ("+WD[d.getDay()]+")｜📍"+editingSite+" を編集中";
     document.getElementById("doneState").style.display="none";
     document.getElementById("formArea").style.display="block";
     updateSaveLabel();
@@ -832,29 +895,33 @@
       const d=parseD(s.date);
       const names=s.attendees.map(memberName).join("・");
       const el=document.createElement("div"); el.className="hist";
+      const key=encodeURIComponent(skey(s));
       let treat="";
       if(s.winnerId) treat="<div class='hist-treat'>🏆 <span class='who'>"+esc(memberName(s.winnerId))+"</span> が "+yen(s.amount)+" 奢り</div>";
       const ph=(s.phases||["run","hiit","ice"]).map(k=>{const x=MENU.find(m=>m.k===k);return x?x.e:"";}).join("");
+      const meta="📍"+esc(s.site||DEFAULT_SITE)+(s.recorder?" ・✍️"+esc(s.recorder):"");
       el.innerHTML=
         "<div class='hist-date'><div class='d'>"+d.getDate()+"</div><div class='m'>"+(d.getMonth()+1)+"月("+WD[d.getDay()]+")</div></div>"+
         "<div class='hist-body'><div class='hist-top'>"+s.attendees.length+"名参加 <span style='font-weight:400'>"+ph+"</span></div>"+
+          "<div class='hist-att'>"+meta+"</div>"+
           "<div class='hist-att'>"+esc(names)+"</div>"+treat+
           (s.note?"<div class='hist-att'>📝 "+esc(s.note)+"</div>":"")+"</div>"+
-        "<div class='hist-acts'><button data-p='"+s.date+"'>📣</button><button data-s='"+s.date+"'>📸</button><button class='e' data-e='"+s.date+"'>✏️</button><button data-x='"+s.date+"'>✕</button></div>";
+        "<div class='hist-acts'><button data-p='"+key+"'>📣</button><button data-s='"+key+"'>📸</button><button class='e' data-e='"+key+"'>✏️</button><button data-x='"+key+"'>✕</button></div>";
       c.appendChild(el);
     });
-    c.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>openShare(b.getAttribute("data-s")));
+    const byKey=k=>sessions.find(s=>skey(s)===decodeURIComponent(k));
+    c.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{ const r=byKey(b.getAttribute("data-s")); if(r) openShare(r); });
     c.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{
-      const date=b.getAttribute("data-p"); const rec=sessions.find(x=>x.date===date);
+      const rec=byKey(b.getAttribute("data-p"));
       if(!rec) return;
       if(!effWebhook()){ toast("Webhook未設定。設定タブを確認",'r'); return; }
-      if(!confirm(date+" の記録をDiscordに投稿しますか？")) return;
+      if(!confirm(rec.date+"（"+(rec.site||DEFAULT_SITE)+"）の記録をDiscordに投稿しますか？")) return;
       sendDiscord(buildMessage(rec)).then(()=>toast("Discordに投稿しました📣",'t')).catch(()=>toast("投稿失敗⚠️",'r'));
     });
-    c.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>startEdit(b.getAttribute("data-e")));
+    c.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>{ const r=byKey(b.getAttribute("data-e")); if(r) startEdit(r.date,r.site); });
     c.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{
-      const date=b.getAttribute("data-x");
-      if(confirm("この日の記録を削除しますか？")){ sessions=sessions.filter(s=>s.date!==date); jsave(TKEY,sessions); refreshAll(); toast("削除しました"); }
+      const rec=byKey(b.getAttribute("data-x")); if(!rec) return;
+      if(confirm(rec.date+"（"+(rec.site||DEFAULT_SITE)+"）の記録を削除しますか？")){ sessions=sessions.filter(s=>skey(s)!==skey(rec)); jsave(TKEY,sessions); refreshAll(); toast("削除しました"); }
     });
   }
   document.getElementById("prevMo").onclick=()=>{ const d=parseD(statMonth+"-01"); d.setMonth(d.getMonth()-1); statMonth=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); renderStats(); };
@@ -885,6 +952,8 @@
     document.getElementById("pgSessions").textContent=st.ses.length;
     document.getElementById("pgAttend").textContent=st.attend;
     document.getElementById("pgTreat").textContent=yen(st.treat);
+    const bySite={}; st.ses.forEach(s=>{ const k=s.site||DEFAULT_SITE; bySite[k]=(bySite[k]||0)+1; });
+    document.getElementById("pgSites").textContent=Object.keys(bySite).map(k=>"📍"+k+" "+bySite[k]+"回").join("　");
 
     // 男気ランキング（年度累計）
     const tl=document.getElementById("pgTreatList"); tl.innerHTML="";
@@ -917,8 +986,10 @@
   function buildProgressMessage(){
     const st=seasonStats();
     const lines=[];
-    lines.push("📋 **朝活 途中経過まとめ｜"+seasonPeriodLabel()+"**");
+    lines.push("📋 **朝活地球 途中経過まとめ｜"+seasonPeriodLabel()+"**");
     lines.push("☀️ 開催 "+st.ses.length+"回｜のべ参加 "+st.attend+"名"+(config.host?"｜主催 "+config.host:""));
+    const bySite={}; st.ses.forEach(s=>{ const k=s.site||DEFAULT_SITE; bySite[k]=(bySite[k]||0)+1; });
+    if(Object.keys(bySite).length>1) lines.push("🌏 "+Object.keys(bySite).map(k=>k+" "+bySite[k]+"回").join("・"));
     lines.push("");
     const treats=st.per.filter(x=>x.treat>0).sort((a,b)=>b.treat-a.treat);
     lines.push("🥊 **男気途中経過** 総額 "+yen(st.treat));
@@ -1025,9 +1096,10 @@
     const d=parseD(rec.date);
     const names=rec.attendees.map(memberName);
     const lines=[];
-    lines.push("🌅 **朝活 RHIR** "+d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate()+" ("+WD[d.getDay()]+") "+(rec.time||"05:30")+" START");
-    const nth=sessions.filter(s=>s.date.slice(0,7)===rec.date.slice(0,7)&&s.date<=rec.date).length;
-    lines.push("🔥 連続"+streakAt(rec.date)+"日目｜"+(d.getMonth()+1)+"月 "+nth+"回目"+(config.host?"｜主催 "+config.host:""));
+    const site=rec.site||DEFAULT_SITE;
+    lines.push("🌅 **朝活地球 RHIR** "+d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate()+" ("+WD[d.getDay()]+") "+(rec.time||"05:30")+" START｜📍 "+site);
+    const nth=sessions.filter(s=>(s.site||DEFAULT_SITE)===site&&s.date.slice(0,7)===rec.date.slice(0,7)&&s.date<=rec.date).length;
+    lines.push("🔥 連続"+streakAt(rec.date,site)+"日目｜"+(d.getMonth()+1)+"月 "+nth+"回目"+(config.host?"｜主催 "+config.host:""));
     const menu=(rec.phases||["run","hiit","ice"]).map(k=>{const x=MENU.find(m=>m.k===k);return x?x.e+" "+x.l:"";}).filter(Boolean);
     if(menu.length) lines.push("🔁 "+menu.join(" → ")+" → REPEAT");
     lines.push("");
@@ -1042,7 +1114,7 @@
     }
     if(rec.checkin) lines.push("📍 https://maps.google.com/?q="+rec.checkin.lat+","+rec.checkin.lng);
     if(rec.note){ lines.push(""); lines.push("📝 "+rec.note); }
-    lines.push("— Thcc.");
+    lines.push("— Thcc."+(rec.recorder?"（✍️ "+rec.recorder+"）":""));
     return lines.join("\n");
   }
   function sendDiscord(content){
@@ -1092,11 +1164,11 @@
     x.fillText("ア サ カ ツ キ ロ ク",cx,y); y+=128;
     // title
     x.save(); x.translate(cx,y); x.transform(1,0,-0.14,1,0,0);
-    x.fillStyle=RED; x.font="900 160px "+JPFONT; x.fillText("朝活記録。",8,8);
-    x.fillStyle=WHT; x.fillText("朝活記録。",0,0);
+    x.fillStyle=RED; x.font="900 160px "+JPFONT; x.fillText("朝活地球。",8,8);
+    x.fillStyle=WHT; x.fillText("朝活地球。",0,0);
     x.restore(); y+=84;
     x.fillStyle=MUT; x.font="400 42px Anton, sans-serif";
-    x.fillText("A S A K A T S U   L O G",cx,y); y+=104;
+    x.fillText("A S A K A T S U   E A R T H",cx,y); y+=104;
     // big date
     const d=parseD(rec.date);
     x.fillStyle=WHT; x.font="400 200px Anton, sans-serif";
@@ -1105,7 +1177,7 @@
     const dayTxt=["SUN","MON","TUE","WED","THU","FRI","SAT"][d.getDay()];
     x.font="800 40px "+JPFONT;
     const chipW=x.measureText(dayTxt).width+56, chipH=64;
-    const startTxt=(rec.time||"05:30")+" START";
+    const startTxt=(rec.time||"05:30")+" START ・ "+(rec.site||DEFAULT_SITE).toUpperCase();
     x.font="700 40px "+JPFONT;
     const stW=x.measureText(startTxt).width;
     const sx0=cx-(chipW+30+stW)/2;
@@ -1168,7 +1240,7 @@
     let by=H-336;
     x.fillStyle=RED; x.fillRect(cx-40,by-118,80,8);
     x.fillStyle=WHT; x.font="400 100px Anton, sans-serif";
-    x.fillText(String(streakAt(rec.date)),cx,by); by+=50;
+    x.fillText(String(streakAt(rec.date,rec.site||DEFAULT_SITE)),cx,by); by+=50;
     x.fillStyle=MUT; x.font="700 30px "+JPFONT;
     x.fillText("D A Y   S T R E A K",cx,by); by+=96;
     x.strokeStyle=LINE; x.lineWidth=2;
@@ -1180,9 +1252,10 @@
     return cv;
   }
   let shareBlob=null, shareDate=null, sharePrevUrl=null;
-  async function openShare(date){
-    const rec=sessions.find(s=>s.date===date);
+  async function openShare(dateOrRec){
+    const rec= typeof dateOrRec==="object"? dateOrRec : (findRec(dateOrRec,curSite())||sessions.find(s=>s.date===dateOrRec));
     if(!rec){ toast("その日の記録がありません",'r'); return; }
+    const date=rec.date;
     try{ await document.fonts.load('400 100px Anton'); }catch(e){}
     const cv=drawShare(rec);
     cv.toBlob(b=>{
@@ -1280,10 +1353,54 @@
 
   function refreshAll(){ renderHeader(); renderRecordState(); renderStats(); renderProgress(); renderCrew(); }
 
+  /* ---------- cloud sync (Firebase Firestore) ---------- */
+  var db=null;
+  var CLOUD_DOCS={}; CLOUD_DOCS[RKEY]="roster"; CLOUD_DOCS[TKEY]="sessions";
+  function cloudPush(k,v){
+    if(!db || !CLOUD_DOCS || !CLOUD_DOCS[k]) return;
+    db.collection("asakatsu").doc(CLOUD_DOCS[k])
+      .set({json:JSON.stringify(v), updatedAt:Date.now(), by:(config.host||"")})
+      .catch(e=>{ console.warn("cloud push failed",e); setCloudStatus("⚠️ 送信エラー（通信を確認）",false); });
+  }
+  function setCloudStatus(txt,ok){
+    const el=document.getElementById("cloudStatus");
+    if(el){ el.textContent=txt; el.style.color=ok?"var(--teal)":"var(--red)"; }
+  }
+  function initCloud(){
+    if(!FIREBASE_CONFIG){ setCloudStatus("未設定：データはこの端末だけに保存されます",false); return; }
+    if(typeof firebase==="undefined"){ setCloudStatus("⚠️ オフライン起動（同期は次回接続時）",false); return; }
+    try{
+      firebase.initializeApp(FIREBASE_CONFIG);
+      db=firebase.firestore();
+      Object.keys(CLOUD_DOCS).forEach(k=>{
+        db.collection("asakatsu").doc(CLOUD_DOCS[k]).onSnapshot(function(doc){
+          if(doc.metadata && doc.metadata.hasPendingWrites) return;
+          if(!doc.exists){
+            const local=jload(k,[]);
+            if(local && local.length) cloudPush(k,local); // クラウドが空→この端末のデータを初期投入
+            return;
+          }
+          try{
+            const remote=JSON.parse(doc.data().json);
+            if(k===TKEY) normSessions(remote);
+            if(JSON.stringify(remote)!==localStorage.getItem(k)){
+              if(k===RKEY) roster=remote; else sessions=remote;
+              localStorage.setItem(k, JSON.stringify(remote));
+              refreshAll();
+              setCloudStatus("☁️ 同期OK（最終受信 "+new Date().toLocaleTimeString("ja-JP")+"）",true);
+            }
+          }catch(e){ console.warn("cloud apply failed",e); }
+        }, function(err){ setCloudStatus("⚠️ 同期エラー："+(err&&err.code||err),false); });
+      });
+      setCloudStatus("☁️ 接続OK：みんなで共有中",true);
+    }catch(e){ console.warn(e); setCloudStatus("⚠️ 初期化エラー",false); }
+  }
+
   /* ---------- init ---------- */
   document.getElementById("sesDate").value=todayStr();
   applyConfig();
   refreshAll();
+  initCloud();
 })();
 </script>
 </body>
