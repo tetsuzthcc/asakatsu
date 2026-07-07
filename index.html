@@ -181,6 +181,7 @@
   .toggle-row{display:flex;gap:8px;margin-bottom:12px}
   .toggle-row button{flex:1;background:var(--bg2);border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:9px;font-size:12px;font-weight:800;cursor:pointer;letter-spacing:.04em}
   .toggle-row button.on{background:var(--white);color:#0a0b0d;border-color:var(--white)}
+  #meMoodRow button{font-size:22px;padding:6px 0;line-height:1.3}
 
   /* history */
   .hist{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}
@@ -315,7 +316,7 @@
         <div style="height:18px"></div>
 
         <label class="fld">🔁 Menu / 今朝のメニュー</label>
-        <div class="flow">RUN<span class="a">→</span>HEAT (HIIT)<span class="a">→</span>ICE<span class="a">→</span>REPEAT</div>
+        <div class="flow">RUN<span class="a">/</span>WALK<span class="a">→</span>HIIT<span class="a">→</span>ICE<span class="a">→</span>REPEAT</div>
         <div class="chips" id="menuChips"></div>
 
         <div style="height:18px"></div>
@@ -635,7 +636,7 @@
   function memberName(id){ const m=roster.find(x=>x.id===id); return m?m.name:"（不明）"; }
   function effWebhook(){ return (config.webhook||"").trim() || BUILTIN_WEBHOOK; }
 
-  const MENU=[{k:"run",e:"🏃",l:"RUN"},{k:"hiit",e:"🔥",l:"HEAT"},{k:"ice",e:"🧊",l:"ICE"}];
+  const MENU=[{k:"run",e:"🏃",l:"RUN"},{k:"walk",e:"🚶",l:"WALK"},{k:"hiit",e:"🔥",l:"HIIT"},{k:"ice",e:"🧊",l:"ICE"}];
 
   // ---- record-tab state ----
   let attArr=[];        // 参加者（来た人全員）
@@ -1504,7 +1505,8 @@
     document.getElementById("meCal").innerHTML=html;
     // きょうのメモ（保存済みなら呼び出し）
     const todayMemo=memos.find(x=>x.id===cur+"@"+todayStr());
-    if(todayMemo){ meMood=todayMemo.mood||null; document.getElementById("meMemoText").value=todayMemo.text||""; }
+    const mt=document.getElementById("meMemoText");
+    if(todayMemo && !mt.value && !meMood){ meMood=todayMemo.mood||null; mt.value=todayMemo.text||""; } // 入力途中は同期で上書きしない
     renderMoodRow();
     // メモ履歴
     const mineMemos=memos.filter(x=>x.member===cur).sort((a,b)=>a.date<b.date?1:-1).slice(0,14);
@@ -1519,7 +1521,7 @@
   };
   document.querySelectorAll("#meMoodRow button").forEach(b=>b.onclick=()=>{ meMood=b.getAttribute("data-mood"); renderMoodRow(); });
   document.getElementById("meMemoSave").onclick=function(){
-    const cur=meId(); if(!cur){ toast("先に自分の名前を選んでください",'r'); return; }
+    const cur=meId(); if(!cur || !roster.find(m=>m.id===cur)){ toast("先に自分の名前を選んでください",'r'); return; }
     const text=document.getElementById("meMemoText").value.trim();
     if(!meMood && !text){ toast("きぶんか一言、どちらかを入れてください"); return; }
     const id=cur+"@"+todayStr();
