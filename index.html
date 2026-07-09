@@ -23,10 +23,14 @@
     --panel:#15181d;
     --panel2:#1b1f26;
     --line:#262b33;
-    --teal:#19e3c4;
-    --teal-dim:#0e8f7c;
-    --red:#ff3a1f;
-    --red-dim:#b52412;
+    /* ===== Thcc Brand Colors ===== */
+    --teal:#5ce1e6;      /* OG Blue */
+    --teal-dim:#35989c;
+    --red:#ee3e23;       /* Achi Red */
+    --red-dim:#a92b17;
+    --green:#0da84a;     /* Delta Green */
+    --purple:#cb6ce6;    /* AddictedPurple */
+    --yellow:#ffd21f;    /* RefreshLemon */
     --white:#f4f6f7;
     --muted:#7b828c;
     --muted2:#565d67;
@@ -37,8 +41,8 @@
     font-family:"Helvetica Neue",Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
     min-height:100vh;padding-bottom:86px;overflow-x:hidden;
     background:
-      radial-gradient(1200px 400px at 80% -10%, rgba(25,227,196,.06), transparent 60%),
-      radial-gradient(900px 400px at -10% 20%, rgba(255,58,31,.06), transparent 60%),
+      radial-gradient(1200px 400px at 80% -10%, rgba(92,225,230,.06), transparent 60%),
+      radial-gradient(900px 400px at -10% 20%, rgba(238,62,35,.06), transparent 60%),
       var(--bg);
   }
   .disp{
@@ -59,8 +63,9 @@
   .streak-badge{
     text-align:right;
   }
-  .streak-badge .n{font-family:"Anton",Impact,sans-serif;font-size:30px;color:var(--red);transform:skewX(-8deg);display:inline-block;line-height:1}
+  .streak-badge .n{font-family:"Anton",Impact,sans-serif;font-size:30px;color:var(--yellow);transform:skewX(-8deg);display:inline-block;line-height:1}
   .streak-badge .l{font-size:9px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
+  .streak-badge .l2{font-size:8.5px;letter-spacing:.02em;color:var(--muted);margin-top:3px;line-height:1.45}
   .tagline{margin-top:8px;font-family:"Anton",Impact,sans-serif;transform:skewX(-8deg);font-size:20px;letter-spacing:.01em;line-height:1}
   .tagline .s{opacity:.35;margin:0 2px}
   .subjp{margin-top:10px;font-size:11px;color:var(--muted);letter-spacing:.16em;font-weight:700}
@@ -70,7 +75,7 @@
   .hxh .kanji{
     font-family:"Hiragino Kaku Gothic StdN","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
     font-weight:900;font-size:33px;letter-spacing:.1em;transform:skewX(-7deg);display:inline-block;
-    text-shadow:2px 2px 0 rgba(255,58,31,.28);
+    text-shadow:2px 2px 0 rgba(238,62,35,.28);
   }
   .hxh .romaji{font-size:10px;letter-spacing:.32em;color:var(--muted);font-weight:800;text-transform:uppercase;margin-top:5px}
   .datestrip{
@@ -112,8 +117,8 @@
     user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;transition:.12s;display:flex;align-items:center;gap:6px;line-height:1;
   }
   .chip:active{transform:scale(.95)}
-  .chip.on{background:var(--teal);color:#062b25;border-color:var(--teal);box-shadow:0 0 0 3px rgba(25,227,196,.15)}
-  .chip.winner{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 0 0 3px rgba(255,58,31,.18)}
+  .chip.on{background:var(--teal);color:#062b25;border-color:var(--teal);box-shadow:0 0 0 3px rgba(92,225,230,.15)}
+  .chip.winner{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 0 0 3px rgba(238,62,35,.18)}
   .chip.add{border-style:dashed;color:var(--teal);border-color:var(--teal-dim)}
   .chip .cnt{font-size:10px;opacity:.6;font-weight:800}
   .hint{font-size:12px;color:var(--muted);line-height:1.6}
@@ -140,18 +145,18 @@
   .cta{
     width:100%;border:none;border-radius:14px;padding:18px;cursor:pointer;
     font-family:"Anton",Impact,sans-serif;transform:skewX(-8deg);font-size:22px;letter-spacing:.03em;
-    background:var(--red);color:#fff;box-shadow:0 8px 24px rgba(255,58,31,.28);text-transform:uppercase;
+    background:var(--red);color:#fff;box-shadow:0 8px 24px rgba(238,62,35,.28);text-transform:uppercase;
   }
   .cta>span{display:inline-block;transform:skewX(8deg)}
   .cta:active{transform:skewX(-8deg) scale(.98)}
-  .cta.teal{background:var(--teal);color:#062b25;box-shadow:0 8px 24px rgba(25,227,196,.25)}
+  .cta.teal{background:var(--teal);color:#062b25;box-shadow:0 8px 24px rgba(92,225,230,.25)}
   .cta.ghost{background:transparent;color:var(--white);border:1px solid var(--line);box-shadow:none}
 
   .done-state{text-align:center;padding:10px 0}
-  .done-state .big{font-family:"Anton",Impact,sans-serif;transform:skewX(-8deg);font-size:26px;color:var(--teal)}
+  .done-state .big{font-family:"Anton",Impact,sans-serif;transform:skewX(-8deg);font-size:26px;color:var(--green)}
   .done-state .jp{color:var(--muted);font-size:12px;margin:6px 0 14px;letter-spacing:.1em}
 
-  .editing-banner{background:rgba(25,227,196,.1);border:1px solid var(--teal-dim);color:var(--teal);
+  .editing-banner{background:rgba(92,225,230,.1);border:1px solid var(--teal-dim);color:var(--teal);
     border-radius:10px;padding:9px 12px;font-size:12px;font-weight:800;margin-bottom:12px;letter-spacing:.05em}
 
   /* stat tiles */
@@ -207,7 +212,7 @@
   .switch-row .sub{font-size:11px;color:var(--muted);margin-top:2px}
   .sw{position:relative;width:48px;height:28px;flex-shrink:0}
   .sw input{opacity:0;width:0;height:0}
-  .sw .track{position:absolute;inset:0;background:var(--bg2);border:1px solid var(--line);border-radius:999px;transition:.2s}
+  .sw .track{position:absolute;top:0;left:0;right:0;bottom:0;background:var(--bg2);border:1px solid var(--line);border-radius:999px;transition:.2s}
   .sw .knob{position:absolute;top:3px;left:3px;width:22px;height:22px;background:var(--muted);border-radius:50%;transition:.2s}
   .sw input:checked+.track{background:var(--teal);border-color:var(--teal)}
   .sw input:checked+.track .knob{left:23px;background:#062b25}
@@ -216,7 +221,7 @@
   /* bottom nav */
   nav{
     position:fixed;left:0;right:0;bottom:0;z-index:40;
-    background:rgba(12,13,16,.92);backdrop-filter:blur(12px);border-top:1px solid var(--line);
+    background:rgba(12,13,16,.92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-top:1px solid var(--line);
     display:flex;max-width:480px;margin:0 auto;
   }
   nav button{
@@ -225,21 +230,22 @@
   }
   nav button .ic{font-size:19px;line-height:1}
   nav button .nl{font-size:9px;letter-spacing:.1em;font-weight:800;text-transform:uppercase}
+  nav button .nl2{font-size:7px;letter-spacing:.1em;text-transform:uppercase;opacity:.6;margin-top:-2px}
   nav button.on{color:var(--white)}
-  nav button.on .ic{filter:drop-shadow(0 0 6px rgba(25,227,196,.5))}
+  nav button.on .ic{filter:drop-shadow(0 0 6px rgba(92,225,230,.5))}
 
   /* toast */
   .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(30px);
     background:var(--white);color:#0a0b0d;padding:13px 22px;border-radius:12px;font-size:14px;font-weight:800;
     box-shadow:0 10px 30px rgba(0,0,0,.5);opacity:0;transition:.3s;z-index:60;pointer-events:none;max-width:88%;text-align:center}
   .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
-  .toast.r{background:var(--red);color:#fff} .toast.t{background:var(--teal);color:#062b25}
+  .toast.r{background:var(--red);color:#fff} .toast.t{background:var(--green);color:#fff}
 
   footer{text-align:center;color:var(--muted2);font-size:10px;letter-spacing:.14em;padding:20px 0;text-transform:uppercase}
   .sr{position:absolute;left:-9999px}
 
   /* share modal */
-  .share-ov{position:fixed;inset:0;background:rgba(4,5,6,.88);backdrop-filter:blur(6px);z-index:60;display:none;align-items:center;justify-content:center;padding:18px}
+  .share-ov{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(4,5,6,.88);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);z-index:60;display:none;align-items:center;justify-content:center;padding:18px}
   .share-ov.show{display:flex}
   .share-box{max-width:420px;width:100%}
   .share-box img{display:block;width:auto;max-width:100%;max-height:62vh;margin:0 auto 14px;border:1px solid var(--line);border-radius:10px}
@@ -260,16 +266,17 @@
           <div class="kanji">朝活地球<span class="dot">。</span></div>
           <div class="romaji">Asakatsu Earth</div>
         </div>
-        <div class="subjp">Bangkok Morning Club<span class="dot">。</span></div>
+        <div class="subjp">Good Morning World by Thcc<span class="dot">.</span></div>
       </div>
       <div class="streak-badge">
         <div><span class="n" id="streakN">0</span></div>
         <div class="l">DAY STREAK</div>
+        <div class="l2">世界のどこかで朝活継続中<br>Somewhere on Earth, every morning 🌏</div>
       </div>
     </div>
     <div class="datestrip">
       <div class="big" id="hdrDate">—</div>
-      <div class="time" id="hdrTime">05:30<small> START</small></div>
+      <button id="aboutBtn" style="margin-left:auto;background:none;border:1px solid var(--line);color:var(--muted);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;letter-spacing:.08em;cursor:pointer">❓ About</button>
     </div>
   </header>
 
@@ -283,13 +290,14 @@
 
       <div id="formArea">
         <div class="row2" style="margin-bottom:14px">
-          <div><label class="fld">Date</label><input type="date" id="sesDate"></div>
-          <div><label class="fld">Start</label><input type="time" id="sesTime" value="05:30"></div>
+          <div><label class="fld">Date / 日付</label><input type="date" id="sesDate"></div>
+          <div><label class="fld">Start / 開始</label><input type="time" id="sesTime" value="05:30"></div>
         </div>
         <div class="row2" style="margin-bottom:14px">
-          <div><label class="fld">📍 拠点</label><input type="text" id="sesSite" placeholder="例：Bangkok" list="siteList"></div>
-          <div><label class="fld">✍️ 入力者</label><input type="text" id="sesRecorder" placeholder="あなたの名前"></div>
+          <div><label class="fld">📍 Where / 拠点</label><input type="text" id="sesSite" placeholder="例：Bangkok" list="siteList"></div>
+          <div><label class="fld">✍️ Recorded by / 入力者</label><input type="text" id="sesRecorder" placeholder="あなたの名前 / Your name"></div>
         </div>
+        <div class="chips" id="recorderChips" style="margin:-6px 0 14px"></div>
         <datalist id="siteList">
           <option value="Bangkok"></option>
           <option value="KL"></option>
@@ -300,15 +308,15 @@
 
         <label class="fld">Attendance / 参加メンバー <span id="attCount" class="accent-t"></span></label>
         <div class="quick-row">
-          <button class="quick-btn tealtxt" id="sameAsLast">↻ 前回と同じ</button>
-          <button class="quick-btn" id="clearAtt">クリア</button>
+          <button class="quick-btn tealtxt" id="sameAsLast">↻ 前回と同じ / Same as last</button>
+          <button class="quick-btn" id="clearAtt">クリア / Clear</button>
         </div>
         <div class="chips" id="attChips"></div>
         <div id="addMemberBox" style="display:none;margin-top:10px">
-          <input type="text" id="newMemberName" placeholder="新しい人の名前" style="margin-bottom:8px">
+          <input type="text" id="newMemberName" placeholder="新しい人の名前 / New member's name" style="margin-bottom:8px">
           <div class="row2">
-            <label class="chk-inline"><input type="checkbox" id="newMemberJanken" checked> 男気じゃんけんに参加</label>
-            <button class="quick-btn tealtxt" id="confirmAddMember" style="flex:0 0 84px">追加</button>
+            <label class="chk-inline"><input type="checkbox" id="newMemberJanken" checked> 男気じゃんけんに参加 / Joins Gochi Janken</label>
+            <button class="quick-btn tealtxt" id="confirmAddMember" style="flex:0 0 84px">追加 / Add</button>
           </div>
           <div class="mini">女性・子供など奢り対象外の人はチェックを外して登録<span class="dot">。</span>次回から自動で除外されます。<br>間違えたときは、メンバーのチップを<b>長押し</b>すると修正・削除できます。</div>
         </div>
@@ -321,25 +329,26 @@
 
         <div style="height:18px"></div>
 
-        <label class="fld">🥊 男気じゃんけん 参加者</label>
+        <label class="fld">🥊 Gochi Janken ｜ 男気じゃんけん 参加者</label>
+        <div class="hint" style="margin-bottom:6px">普通のじゃんけんとは逆。<b>勝った人がみんなに奢る</b>——それが男気（OTOKO＝漢）。☕コーヒーが定番、🍦アイスもOK。負けても失うものなし、勝ったら誇りと小銭を差し出せ。参加は自由（やらない日もOK）。<br>Rock-paper-scissors — reversed. <b>The WINNER pays for everyone.</b> That's <i>Otoko-gi</i> (漢 = spirit of a true MAN). Usually coffee, ice cream counts too. Lose and you get a free drink; win and you earn glory (and the bill). Join if you dare — totally optional.</div>
         <div class="chips" id="jankenPartChips"></div>
 
         <div style="height:14px"></div>
-        <label class="fld">🏆 勝者（奢る人）</label>
+        <label class="fld">🏆 勝者（奢る人）｜ Winner = Treater</label>
         <div class="chips" id="winnerChips"></div>
         <div class="row2" style="margin-top:12px">
-          <div class="yen-wrap" style="flex:2"><input type="number" id="treatAmount" placeholder="奢り額（฿）" inputmode="numeric"></div>
-          <button class="quick-btn" id="noJanken" style="flex:1">奢りなし</button>
+          <div class="yen-wrap" style="flex:2"><input type="number" id="treatAmount" placeholder="奢り額 / Amount（฿）" inputmode="numeric"></div>
+          <button class="quick-btn" id="noJanken" style="flex:1">奢りなし / No treat</button>
         </div>
 
         <div style="height:18px"></div>
 
-        <label class="fld">Note</label>
-        <textarea id="sesNote" placeholder="今朝のひとこと（任意）"></textarea>
+        <label class="fld">NOTE — アサカツ㌔ク。</label>
+        <textarea id="sesNote" placeholder="今朝のひとこと、MENU詳細（走った距離、Rep数など、なんでもアサカツキロク。）/ Today's word, distance, reps — anything!"></textarea>
 
         <div class="quick-row" style="margin-top:12px">
-          <button class="quick-btn" id="geoBtn">📍 現在地を記録（任意）</button>
-          <button class="quick-btn" id="gmapBtn">🗺 Gmapから選ぶ</button>
+          <button class="quick-btn" id="geoBtn">📍 現在地 / Check-in（任意）</button>
+          <button class="quick-btn" id="gmapBtn">🗺 Gmapから選ぶ / Pick on map</button>
         </div>
         <div id="gmapBox" style="display:none;margin-top:8px">
           <div class="mini">Googleマップで場所を開いて「共有 → リンクをコピー」し、下に貼り付けてください。URLのほか「13.75, 100.50」の座標や場所名だけでもOK。</div>
@@ -352,16 +361,22 @@
         <div class="mini" id="geoMini"></div>
 
         <div style="height:14px"></div>
-        <button class="cta" id="saveBtn"><span>▶ 記録する</span></button>
+        <button class="cta" id="saveBtn"><span>▶ 記録する / SAVE</span></button>
       </div>
 
       <div class="done-state" id="doneState" style="display:none">
         <div class="big">DONE<span class="dot">.</span></div>
-        <div class="jp">今朝の記録は完了。お疲れさまでした。</div>
-        <button class="cta" id="sendTodayBtn" style="margin-bottom:10px"><span>📣 Discordに送る</span></button>
-        <button class="cta" id="shareTodayBtn" style="margin-bottom:10px"><span>📸 シェア画像を作る</span></button>
-        <button class="cta ghost" id="editTodayBtn" style="margin-bottom:10px"><span>今朝の記録を編集</span></button>
-        <button class="cta ghost" id="otherDayBtn"><span>📅 別の日を記録・編集</span></button>
+        <div class="jp">今朝の記録は完了。お疲れさまでした。/ Morning logged. Well done.</div>
+        <div id="attachBox" style="margin-bottom:10px">
+          <input type="file" id="attachInput" accept="image/*,video/*" multiple style="display:none">
+          <button class="cta ghost" id="attachBtn"><span>📷 写真・動画をつける / Add photos & videos</span></button>
+          <div id="attachThumbs" style="display:none;gap:6px;flex-wrap:wrap;margin-top:8px"></div>
+          <div class="hint" style="margin-top:6px">下の📣投稿と一緒にDiscordへ送ります。最大10点・合計約10MB（写真は自動で軽量化🪶）<br>Sent together with your post below. Up to 10 files, ~10MB total. Photos auto-compressed.</div>
+        </div>
+        <button class="cta" id="sendTodayBtn" style="margin-bottom:10px"><span>📣 Discordに送る / Post to Discord</span></button>
+        <button class="cta" id="shareTodayBtn" style="margin-bottom:10px"><span>📸 シェア画像を作る / Share image</span></button>
+        <button class="cta ghost" id="editTodayBtn" style="margin-bottom:10px"><span>今朝の記録を編集 / Edit</span></button>
+        <button class="cta ghost" id="otherDayBtn"><span>📅 別の日を記録・編集 / Other day</span></button>
       </div>
     </div>
 
@@ -397,9 +412,9 @@
     <div class="sec-h" style="margin-bottom:12px"><span class="bar r"></span><span class="t">Season Report</span><span class="jp" id="pgPeriod">2026年度</span></div>
 
     <div class="tiles">
-      <div class="tile"><span class="n t" id="pgSessions">0</span><div class="l">開催</div></div>
-      <div class="tile"><span class="n" id="pgAttend">0</span><div class="l">のべ参加</div></div>
-      <div class="tile"><span class="n r" id="pgTreat">฿0</span><div class="l">男気総額</div></div>
+      <div class="tile"><span class="n t" id="pgSessions">0</span><div class="l">開催 Sessions</div></div>
+      <div class="tile"><span class="n" id="pgAttend">0</span><div class="l">のべ参加 Joins</div></div>
+      <div class="tile"><span class="n r" id="pgTreat">฿0</span><div class="l">男気総額 Treats</div></div>
     </div>
     <div class="mini" id="pgSites" style="margin:-6px 0 12px;text-align:center"></div>
 
@@ -410,12 +425,12 @@
 
     <div class="card">
       <div class="sec-h"><span class="bar"></span><span class="t">Crew</span><span class="jp" id="pgCrewCount">参加者名簿</span></div>
-      <div class="mini" style="margin-bottom:10px">🆕 ＝ 初参加（1回目）／2回以上はリピーター</div>
+      <div class="mini" style="margin-bottom:10px">🆕 ＝ 初参加（1回目）／2回以上はリピーター ・ 🆕 = first-timer</div>
       <div id="pgCrewList"></div>
     </div>
 
     <div class="card">
-      <button class="cta" id="pgSendBtn"><span>📣 途中経過をDiscordに送る</span></button>
+      <button class="cta" id="pgSendBtn"><span>📣 途中経過をDiscordに送る / Post report</span></button>
     </div>
   </section>
 
@@ -423,14 +438,14 @@
   <section class="tabpage" id="tab-me">
     <div class="card">
       <div class="sec-h"><span class="bar"></span><span class="t">My Page</span><span class="jp">マイページ</span></div>
-      <label class="fld">あなたは誰？（この端末に記憶されます）</label>
+      <label class="fld">あなたは誰？ / Who are you?（この端末に記憶されます）</label>
       <select id="meSelect"></select>
     </div>
     <div id="meBody" style="display:none">
       <div class="tiles">
-        <div class="tile"><span class="n t" id="meTotal">0</span><div class="l">通算参加</div></div>
-        <div class="tile"><span class="n" id="meMonth">0</span><div class="l">今月</div></div>
-        <div class="tile"><span class="n r" id="meStreak">0</span><div class="l">連続日数</div></div>
+        <div class="tile"><span class="n t" id="meTotal">0</span><div class="l">通算参加 Total</div></div>
+        <div class="tile"><span class="n" id="meMonth">0</span><div class="l">今月 Month</div></div>
+        <div class="tile"><span class="n r" id="meStreak">0</span><div class="l">連続日数 Streak</div></div>
       </div>
       <div class="mini" id="meTreat" style="margin:-6px 0 12px;text-align:center"></div>
       <div class="card">
@@ -438,8 +453,8 @@
         <div class="toggle-row" id="meMoodRow">
           <button data-mood="😄">😄</button><button data-mood="🙂">🙂</button><button data-mood="😐">😐</button><button data-mood="😴">😴</button><button data-mood="🤕">🤕</button>
         </div>
-        <input type="text" id="meMemoText" placeholder="一言メモ（任意）" style="margin-top:10px">
-        <button class="cta teal" id="meMemoSave" style="margin-top:10px"><span>✍️ きょうの記録を残す</span></button>
+        <input type="text" id="meMemoText" placeholder="一言メモ（任意）/ One-line memo" style="margin-top:10px">
+        <button class="cta teal" id="meMemoSave" style="margin-top:10px"><span>✍️ きょうの記録を残す / Save today</span></button>
       </div>
       <div class="card">
         <div class="sec-h"><span class="bar"></span><span class="t">Calendar</span><span class="jp" id="meCalLabel">参加カレンダー</span></div>
@@ -457,17 +472,17 @@
     <div class="card">
       <div class="sec-h"><span class="bar"></span><span class="t">Add Member</span><span class="jp">メンバー登録</span></div>
       <div class="row2">
-        <input type="text" id="crewNewName" placeholder="名前を入力" style="flex:3">
-        <button class="quick-btn tealtxt" id="crewAddBtn" style="flex:1">追加</button>
+        <input type="text" id="crewNewName" placeholder="名前を入力 / Name" style="flex:3">
+        <button class="quick-btn tealtxt" id="crewAddBtn" style="flex:1">追加 / Add</button>
       </div>
-      <div class="mini">一度来た人は自動でここに残り、次回からタップで選べます。</div>
+      <div class="mini">一度来た人は自動でここに残り、次回からタップで選べます。/ Members stay here after their first visit.</div>
     </div>
 
     <div class="card flat">
       <div class="sec-h"><span class="bar r"></span><span class="t">The Crew</span><span class="jp" id="crewCount"></span></div>
       <div class="toggle-row">
-        <button id="sortAtt" class="on">参加回数順</button>
-        <button id="sortTreat">奢り額順</button>
+        <button id="sortAtt" class="on">参加回数順 / by Joins</button>
+        <button id="sortTreat">奢り額順 / by Treats</button>
       </div>
       <div id="crewList"></div>
     </div>
@@ -477,7 +492,7 @@
   <section class="tabpage" id="tab-config">
     <div class="card">
       <div class="sec-h"><span class="bar"></span><span class="t">Host</span><span class="jp">主催者</span></div>
-      <label class="fld">主催者名</label>
+      <label class="fld">主催者名 / Host name</label>
       <input type="text" id="cfgHost" placeholder="例：てつ">
     </div>
 
@@ -487,7 +502,7 @@
       <label class="fld" style="margin-top:4px">Webhook URL</label>
       <input type="text" id="cfgWebhook" placeholder="https://discord.com/api/webhooks/...">
       <div class="hint" style="margin-top:8px">Discordのチャンネル設定 → 連携サービス → ウェブフックを作成 → URLをコピー。<br><span class="accent-t">共有のコツ：</span>後でこのファイルをネットに置くなら、コード先頭の <b>BUILTIN_WEBHOOK</b> に貼れば、URLを配るだけで全員が同じチャンネルに投稿できます（各自設定不要）。</div>
-      <button class="cta ghost" id="testDiscord" style="margin-top:12px;font-size:16px"><span>テスト送信</span></button>
+      <button class="cta ghost" id="testDiscord" style="margin-top:12px;font-size:16px"><span>テスト送信 / Test post</span></button>
     </div>
 
     <div class="card">
@@ -500,28 +515,28 @@
       <div class="sec-h"><span class="bar"></span><span class="t">Backup</span><span class="jp">引き継ぎ・バックアップ</span></div>
       <div class="hint" style="margin-bottom:12px">不在の日に誰かへ引き継ぐときは「書き出し」でファイルを渡し、相手が「読み込み」すればメンバーと記録がそのまま移ります。</div>
       <div class="row2">
-        <button class="quick-btn tealtxt" id="exportBtn">↓ 書き出し</button>
-        <button class="quick-btn" id="importBtn">↑ 読み込み</button>
+        <button class="quick-btn tealtxt" id="exportBtn">↓ 書き出し / Export</button>
+        <button class="quick-btn" id="importBtn">↑ 読み込み / Import</button>
       </div>
       <input type="file" id="importFile" accept="application/json" class="sr">
     </div>
 
     <div class="card">
       <div class="sec-h"><span class="bar r"></span><span class="t">Save Config</span></div>
-      <button class="cta teal" id="saveConfig" style="font-size:18px"><span>設定を保存</span></button>
+      <button class="cta teal" id="saveConfig" style="font-size:18px"><span>設定を保存 / Save</span></button>
     </div>
   </section>
 
-  <footer>RHIR by Thcc<span class="dot">.</span> — Run. Heat. Ice. Repeat.<br><span style="opacity:.55">Asakatsu Earth v2.3.1 ☁️</span></footer>
+  <footer>RHIR by Thcc<span class="dot">.</span> — Run. Heat. Ice. Repeat.<br><span style="opacity:.55">Asakatsu Earth v2.7.1 Final 🌏</span></footer>
 </div>
 
 <nav>
-  <button data-tab="log" class="on"><span class="ic">🔥</span><span class="nl">記録</span></button>
-  <button data-tab="me"><span class="ic">👤</span><span class="nl">マイ</span></button>
-  <button data-tab="stats"><span class="ic">📊</span><span class="nl">統計</span></button>
-  <button data-tab="progress"><span class="ic">📋</span><span class="nl">経過</span></button>
-  <button data-tab="crew"><span class="ic">👥</span><span class="nl">メンバー</span></button>
-  <button data-tab="config"><span class="ic">⚙︎</span><span class="nl">設定</span></button>
+  <button data-tab="log" class="on"><span class="ic">🔥</span><span class="nl">記録</span><span class="nl2">Log</span></button>
+  <button data-tab="me"><span class="ic">👤</span><span class="nl">マイ</span><span class="nl2">My</span></button>
+  <button data-tab="stats"><span class="ic">📊</span><span class="nl">統計</span><span class="nl2">Stats</span></button>
+  <button data-tab="progress"><span class="ic">📋</span><span class="nl">経過</span><span class="nl2">Report</span></button>
+  <button data-tab="crew"><span class="ic">👥</span><span class="nl">メンバー</span><span class="nl2">Crew</span></button>
+  <button data-tab="config"><span class="ic">⚙︎</span><span class="nl">設定</span><span class="nl2">Config</span></button>
 </nav>
 
 <div class="toast" id="toast"></div>
@@ -532,12 +547,12 @@
     <div style="font-weight:900;font-size:19px;margin-bottom:12px;text-align:center" id="memberOvName">—</div>
     <input type="text" id="mvNameInput" placeholder="名前" style="margin-bottom:10px">
     <div class="share-btns">
-      <button class="cta teal" id="mvRename"><span>✏️ この名前に修正</span></button>
-      <button class="cta ghost" id="mvJanken"><span>♀/子（じゃんけん除外）を切替</span></button>
-      <button class="cta ghost" id="mvDelete"><span>🗑 メンバーを削除</span></button>
-      <button class="cta ghost" id="mvClose"><span>✕ 閉じる</span></button>
+      <button class="cta teal" id="mvRename"><span>✏️ この名前に修正 / Rename</span></button>
+      <button class="cta ghost" id="mvJanken"><span>♀/子（じゃんけん除外）を切替 / Toggle janken</span></button>
+      <button class="cta ghost" id="mvDelete"><span>🗑 メンバーを削除 / Remove</span></button>
+      <button class="cta ghost" id="mvClose"><span>✕ 閉じる / Close</span></button>
     </div>
-    <div class="mini" style="text-align:center;margin-top:8px">削除しても過去の記録は残ります<span class="dot">。</span></div>
+    <div class="mini" style="text-align:center;margin-top:8px">削除しても過去の記録は残ります / Past records are kept<span class="dot">。</span></div>
   </div>
 </div>
 
@@ -545,11 +560,34 @@
   <div class="share-box">
     <img id="sharePrev" alt="シェア画像プレビュー">
     <div class="share-btns">
-      <button class="cta teal" id="shareSendBtn"><span>📲 シェアする</span></button>
-      <button class="cta ghost" id="shareDlBtn"><span>↓ 保存</span></button>
-      <button class="cta ghost" id="shareCloseBtn"><span>✕ 閉じる</span></button>
+      <button class="cta teal" id="shareSendBtn"><span>📲 シェアする / Share</span></button>
+      <button class="cta ghost" id="shareDlBtn"><span>↓ 保存 / Save</span></button>
+      <button class="cta ghost" id="shareCloseBtn"><span>✕ 閉じる / Close</span></button>
     </div>
     <div class="mini" style="text-align:center;margin-top:8px">Instagram / Threads のストーリーや投稿にどうぞ — @thcc.bkk ・ @tetsu.ice</div>
+  </div>
+</div>
+
+<!-- ===== ❓ About：コンセプトと使い方 / Concept & How-to ===== -->
+<div class="share-ov" id="aboutOv">
+  <div class="share-box" style="max-height:86vh;overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 18px">
+    <div style="font-family:'Anton',Impact,sans-serif;transform:skewX(-8deg);font-size:26px;line-height:1.1">朝活地球<span class="dot">。</span><span style="font-size:14px;color:var(--muted)"> Asakatsu Earth</span></div>
+    <div class="subjp" style="margin-top:6px">Good Morning World by Thcc<span class="dot">.</span></div>
+
+    <div style="margin-top:16px;font-weight:900;letter-spacing:.08em">🌏 コンセプト / CONCEPT</div>
+    <div class="hint" style="margin-top:6px;line-height:1.7">朝5:30、世界のどこかで誰かが朝を始める。バンコクでも、ダナンでも、大阪でも。みんなでも、一人でも。誰か一人が記録すれば、地球の朝活は途切れない——それが <b>DAY STREAK</b>。<br><br>Every morning at 5:30, somewhere on Earth, one of us starts the day — Bangkok, Danang, Osaka. Together or solo. As long as <b>someone, somewhere</b> logs a morning, the streak lives on. That's the <b>DAY STREAK</b>.</div>
+
+    <div style="margin-top:16px;font-weight:900;letter-spacing:.08em">🔥 使い方 / HOW TO — 3 STEPS</div>
+    <div class="hint" style="margin-top:6px;line-height:1.7"><b>1. 記録 LOG</b>：日付・拠点・参加メンバーを選んで ▶ SAVE。一人朝活もOK。<br><b>1.</b> Pick date, place & members, hit SAVE. Solo mornings count too.<br><br><b>2. 投稿 POST</b>：📣 でDiscordへ報告。📷 写真・動画も一緒に送れる。<br><b>2.</b> Post your report to Discord — photos & videos welcome.<br><br><b>3. 継続 REPEAT</b>：あとは続けるだけ。streakを絶やすな。<br><b>3.</b> Then just keep showing up. Don't break the streak.</div>
+
+    <div style="margin-top:16px;font-weight:900;letter-spacing:.08em">🥊 GOCHI JANKEN / 男気じゃんけん</div>
+    <div class="hint" style="margin-top:6px;line-height:1.7">普通のじゃんけんとは逆——<b>勝った人がみんなに奢る</b>。それが男気（OTOKO＝漢）。☕コーヒーが定番、🍦アイスもOK。参加は自由。<br>Rock-paper-scissors, reversed: <b>the WINNER pays for everyone</b>. That's <i>Otoko-gi</i> — the spirit of a true MAN（漢）. Usually coffee, sometimes ice cream. Lose = free drink. Win = glory + the bill. Optional, always.</div>
+
+    <div style="margin-top:16px;font-weight:900;letter-spacing:.08em">🔒 データ / YOUR DATA</div>
+    <div class="hint" style="margin-top:6px;line-height:1.7">記録はこの端末とクラウドに同期され、仲間の端末とも共有されます。写真・動画はDiscordへ直接送られ、アプリには保存されません。<br>Logs sync across the crew's devices via cloud. Photos & videos go straight to Discord — never stored in the app.</div>
+
+    <div style="margin:16px 0 14px;text-align:center;font-family:'Anton',Impact,sans-serif;transform:skewX(-8deg);font-size:15px;letter-spacing:.04em">Run. Heat. Ice. Repeat<span class="dot">.</span></div>
+    <button class="cta ghost" id="aboutClose"><span>✕ 閉じる / Close</span></button>
   </div>
 </div>
 
@@ -580,7 +618,7 @@
   const RKEY="thcc_roster_v1", TKEY="thcc_sessions_v1", CKEY="thcc_config_v1";
 
   // ---- storage ----
-  function jload(k,f){ try{ return JSON.parse(localStorage.getItem(k)) ?? f; }catch(e){ return f; } }
+  function jload(k,f){ try{ const v=JSON.parse(localStorage.getItem(k)); return (v===null||v===undefined)? f : v; }catch(e){ return f; } } // ??演算子は旧Safari非対応のため回避
   function jsave(k,v){ localStorage.setItem(k, JSON.stringify(v)); cloudPush(k,v); }
   // ---- 削除の記録（マージ同期で、消した記録が他の端末から復活しないように） ----
   var TOMBKEY="thcc_tombs_v1";
@@ -650,6 +688,21 @@
   function runRenames(){
     let hit=false;
     roster.forEach(m=>{ const nn=NAME_RENAMES[m.name]; if(nn && m.name!==nn){ m.name=nn; touchM(m); hit=true; } });
+    if(hit) jsave(RKEY,roster);
+  }
+  // 名簿への追加メンバー（どの端末でも同じIDで作られるので重複しない）
+  const ENSURE_MEMBERS=[
+    {id:"madd260709a",name:"Nolliyah"},
+    {id:"madd260709b",name:"T.Akiyama"},
+    {id:"madd260709c",name:"Koalaman"}
+  ];
+  function runEnsureMembers(){
+    let hit=false;
+    ENSURE_MEMBERS.forEach(e=>{
+      if(!roster.some(m=>normName(m.name)===normName(e.name))){
+        roster.push({id:e.id,name:e.name,janken:true,updatedAt:new Date().toISOString()}); hit=true;
+      }
+    });
     if(hit) jsave(RKEY,roster);
   }
   function runRosterMerge(){
@@ -741,10 +794,13 @@
   }
   runRepair();
   runRenames();
+  runEnsureMembers();
   runRosterMerge();
 
   const uid=()=> "m"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
   const WD=["日","月","火","水","木","金","土"];
+  const EWD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const EMON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   function todayStr(){ const d=new Date(); return ymd(d); }
   function ymd(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
   function parseD(s){ const p=s.split("-"); return new Date(+p[0],+p[1]-1,+p[2]); }
@@ -753,7 +809,7 @@
   function memberName(id){ const m=roster.find(x=>x.id===id); return m?m.name:"（不明）"; }
   function effWebhook(){ return (config.webhook||"").trim() || BUILTIN_WEBHOOK; }
 
-  const MENU=[{k:"walk",e:"🚶",l:"WALK"},{k:"run",e:"🏃",l:"RUN"},{k:"hiit",e:"🔥",l:"HIIT"},{k:"rope",e:"🪢",l:"ROPE"},{k:"bridge",e:"🌉",l:"BRIDGE"},{k:"hand",e:"🤸",l:"HANDSTAND"},{k:"bokuto",e:"⚔️",l:"BOKUTO"},{k:"ice",e:"🧊",l:"ICE"}]; // WALKはRUNの前、ICEは締め
+  const MENU=[{k:"walk",e:"🚶",l:"WALK"},{k:"run",e:"🏃",l:"RUN"},{k:"hiit",e:"🔥",l:"HIIT"},{k:"str",e:"💪",l:"STRENGTH"},{k:"rope",e:"🪢",l:"ROPE"},{k:"bridge",e:"🌉",l:"BRIDGE"},{k:"hand",e:"🤸",l:"HANDSTAND"},{k:"bokuto",e:"⚔️",l:"BOKUTO"},{k:"ice",e:"🧊",l:"ICEBATH"}]; // WALKはRUNの前、ICEBATHは締め
 
   // ---- record-tab state ----
   let attArr=[];        // 参加者（来た人全員）
@@ -771,8 +827,7 @@
   /* ---------- header ---------- */
   function renderHeader(){
     const d=new Date();
-    document.getElementById("hdrDate").textContent=(d.getMonth()+1)+"/"+d.getDate()+" "+WD[d.getDay()];
-    document.getElementById("hdrTime").innerHTML=(config.defaultTime||"05:30")+"<small> START</small>";
+    document.getElementById("hdrDate").textContent=d.getDate()+"/"+EMON[d.getMonth()]+"/"+d.getFullYear()+" ("+WD[d.getDay()]+"/"+EWD[d.getDay()]+")";
     document.getElementById("streakN").textContent=calcStreak();
   }
   function streakAt(dateStr,site){
@@ -832,15 +887,31 @@
       c.appendChild(el);
     });
     const add=document.createElement("div");
-    add.className="chip add"; add.innerHTML="+ 新しい人";
+    add.className="chip add"; add.innerHTML="+ 新しい人 / New";
     add.onclick=()=>{ const b=document.getElementById("addMemberBox"); b.style.display=b.style.display==="none"?"block":"none"; if(b.style.display==="block") document.getElementById("newMemberName").focus(); };
     c.appendChild(add);
     document.getElementById("attCount").textContent = attArr.length? attArr.length+"名" : "";
+    renderRecorderChips();
+  }
+  // ✍️ Recorded by：参加メンバーからタップで選べる
+  function renderRecorderChips(){
+    const c=document.getElementById("recorderChips"); if(!c) return;
+    c.innerHTML="";
+    const inp=document.getElementById("sesRecorder");
+    const cur=(inp&&inp.value||"").trim();
+    attArr.forEach(id=>{
+      const m=roster.find(x=>x.id===id); if(!m) return;
+      const el=document.createElement("div");
+      el.className="chip"+(normName(m.name)===normName(cur)?" on":"");
+      el.textContent=m.name;
+      el.onclick=()=>{ inp.value=m.name; localStorage.setItem(RECRKEY,m.name); renderRecorderChips(); };
+      c.appendChild(el);
+    });
   }
   function renderJankenPart(){
     const c=document.getElementById("jankenPartChips"); c.innerHTML="";
     const elig=attArr.filter(eligible);
-    if(elig.length===0){ c.innerHTML="<div class='hint'>じゃんけん対象の参加者がいません（女性・子供は自動で除外）。</div>"; return; }
+    if(elig.length===0){ c.innerHTML="<div class='hint'>じゃんけん対象の参加者がいません（女性・子供は自動で除外）。<br>No Gochi Janken players yet — women & kids sit this one out (auto-excluded).</div>"; return; }
     elig.forEach(id=>{
       const el=document.createElement("div");
       el.className="chip"+(jankenArr.includes(id)?" on":"");
@@ -851,7 +922,7 @@
   }
   function renderWinner(){
     const c=document.getElementById("winnerChips"); c.innerHTML="";
-    if(jankenArr.length===0){ c.innerHTML="<div class='hint'>先にじゃんけん参加者を選んでください。</div>"; return; }
+    if(jankenArr.length===0){ c.innerHTML="<div class='hint'>先にじゃんけん参加者を選んでください。/ Pick the janken players above first.</div>"; return; }
     jankenArr.forEach(id=>{
       const el=document.createElement("div");
       el.className="chip"+(winnerId===id?" winner":"");
@@ -913,10 +984,10 @@
     if(!last){ toast("まだ前回の記録がありません"); return; }
     attArr=last.attendees.filter(id=>roster.find(m=>m.id===id));
     jankenArr=(last.jankenIds||attArr.filter(eligible)).filter(id=>attArr.includes(id));
-    winnerId=null; renderAtt(); renderJankenPart(); renderWinner(); toast("前回のメンバーをセット↻",'t');
+    winnerId=null; renderAtt(); renderJankenPart(); renderWinner(); toast("前回のメンバーをセット↻ / Same as last",'t');
   };
   document.getElementById("clearAtt").onclick=()=>{ attArr=[]; jankenArr=[]; winnerId=null; renderAtt(); renderJankenPart(); renderWinner(); };
-  document.getElementById("noJanken").onclick=()=>{ winnerId=null; document.getElementById("treatAmount").value=""; renderWinner(); toast("奢りなしに設定"); };
+  document.getElementById("noJanken").onclick=()=>{ winnerId=null; document.getElementById("treatAmount").value=""; renderWinner(); toast("奢りなしに設定 / No treat today"); };
 
   document.getElementById("geoBtn").onclick=function(){
     const mini=document.getElementById("geoMini");
@@ -971,7 +1042,7 @@
     const time = document.getElementById("sesTime").value || "05:30";
     const site = (editingSite!=null? editingSite : curSite()) || DEFAULT_SITE;
     const recorder = curRecorder();
-    if(attArr.length===0){ toast("参加メンバーを選んでください",'r'); return; }
+    if(attArr.length===0){ toast("参加メンバーを選んでください / Pick at least one member",'r'); return; }
     let newSlot=null;
     if(!editingDate && findRec(date,site)){
       const dd=parseD(date);
@@ -1014,11 +1085,12 @@
   document.getElementById("sendTodayBtn").onclick=function(){
     const rec=findRec(todayStr(),curSite()) || sessions.find(s=>s.date===todayStr());
     if(!rec){ toast("今日の記録がありません",'r'); return; }
-    if(!effWebhook()){ toast("Webhook未設定。設定タブを確認",'r'); switchTab('config'); return; }
+    if(!effWebhook()){ toast("Webhook未設定。設定タブを確認 / Set webhook in Config",'r'); switchTab('config'); return; }
     const btn=this; btn.disabled=true;
-    sendDiscord(buildMessage(rec))
-      .then(()=>toast("Discordに投稿しました📣",'t'))
-      .catch(()=>toast("投稿失敗⚠️ 通信・設定を確認",'r'))
+    const n=attachFiles.length;
+    sendDiscord(buildMessage(rec), attachFiles.slice())
+      .then(()=>{ toast("Discordに投稿しました📣 Posted!"+(n?"（📎"+n+"点付き）":""),'t'); attachFiles=[]; renderAttach(); })
+      .catch(()=>toast("投稿失敗⚠️ 通信・設定・添付サイズを確認",'r'))
       .finally(()=>{ btn.disabled=false; });
   };
   document.getElementById("otherDayBtn").onclick=()=>{
@@ -1033,7 +1105,7 @@
   function updateSaveLabel(){
     const date=editingDate||document.getElementById("sesDate").value||todayStr();
     const btn=document.getElementById("saveBtn"); const d=parseD(date);
-    btn.innerHTML="<span>▶ "+(date===todayStr()?"記録する":(d.getMonth()+1)+"/"+d.getDate()+" の記録を保存")+"</span>";
+    btn.innerHTML="<span>▶ "+(date===todayStr()?"記録する / SAVE":(d.getDate()+"/"+EMON[d.getMonth()]+" の記録を保存 / SAVE"))+"</span>";
   }
   document.getElementById("sesDate").onchange=function(){
     const v=this.value; if(!v) return;
@@ -1058,6 +1130,7 @@
   };
   document.getElementById("sesRecorder").onchange=function(){
     const v=this.value.trim(); if(v) localStorage.setItem(RECRKEY,v);
+    renderRecorderChips();
   };
 
   function resetForm(){
@@ -1069,7 +1142,7 @@
     document.getElementById("treatAmount").value="";
     document.getElementById("sesNote").value="";
     document.getElementById("geoMini").textContent="";
-    document.getElementById("geoBtn").textContent="📍 現在地を記録（任意）";
+    document.getElementById("geoBtn").textContent="📍 現在地 / Check-in（任意）";
     document.getElementById("gmapBox").style.display="none";
     document.getElementById("gmapInput").value="";
     document.getElementById("editBanner").style.display="none";
@@ -1100,7 +1173,7 @@
     document.getElementById("sesNote").value=s.note||"";
     document.getElementById("geoMini").innerHTML = checkin? ("✅ 位置あり："+esc(ciLabel(checkin))):"";
     const b=document.getElementById("editBanner"); b.style.display="block";
-    const d=parseD(date); b.textContent="✏️ "+(d.getMonth()+1)+"/"+d.getDate()+" ("+WD[d.getDay()]+")｜📍"+editingSite+(editingSlot?"（別記録）":"")+" を編集中";
+    const d=parseD(date); b.textContent="✏️ "+(d.getMonth()+1)+"/"+d.getDate()+" ("+WD[d.getDay()]+")｜📍"+editingSite+(editingSlot?"（別記録）":"")+" を編集中 / Editing";
     document.getElementById("doneState").style.display="none";
     document.getElementById("formArea").style.display="block";
     updateSaveLabel();
@@ -1126,7 +1199,7 @@
     // treat ranking this month
     const tl=document.getElementById("treatList"); tl.innerHTML="";
     const treats=roster.map(m=>({name:m.name,v:treatTotal(m.id,statMonth)})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
-    if(treats.length===0){ tl.innerHTML="<div class='empty'>今月の奢りはまだありません<span class='dot'>。</span></div>"; }
+    if(treats.length===0){ tl.innerHTML="<div class='empty'>今月の奢りはまだありません / No treats yet<span class='dot'>。</span></div>"; }
     else{
       const max=treats[0].v;
       treats.forEach((t,i)=>{
@@ -1143,7 +1216,7 @@
   function renderHistory(){
     const c=document.getElementById("histList"); c.innerHTML="";
     const ses=sessions.filter(s=>s.date.startsWith(statMonth));
-    if(ses.length===0){ c.innerHTML="<div class='empty'>この月の記録はまだありません<span class='dot'>。</span></div>"; return; }
+    if(ses.length===0){ c.innerHTML="<div class='empty'>この月の記録はまだありません / No records this month<span class='dot'>。</span></div>"; return; }
     ses.forEach(s=>{
       const d=parseD(s.date);
       const names=s.attendees.map(memberName).join("・");
@@ -1167,9 +1240,9 @@
     c.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{
       const rec=byKey(b.getAttribute("data-p"));
       if(!rec) return;
-      if(!effWebhook()){ toast("Webhook未設定。設定タブを確認",'r'); return; }
+      if(!effWebhook()){ toast("Webhook未設定。設定タブを確認 / Set webhook in Config",'r'); return; }
       if(!confirm(rec.date+"（"+(rec.site||DEFAULT_SITE)+"）の記録をDiscordに投稿しますか？")) return;
-      sendDiscord(buildMessage(rec)).then(()=>toast("Discordに投稿しました📣",'t')).catch(()=>toast("投稿失敗⚠️",'r'));
+      sendDiscord(buildMessage(rec)).then(()=>toast("Discordに投稿しました📣 Posted!",'t')).catch(()=>toast("投稿失敗⚠️",'r'));
     });
     c.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>{ const r=byKey(b.getAttribute("data-e")); if(r) startEdit(r.date,r.site,r); });
     c.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{
@@ -1180,11 +1253,10 @@
   document.getElementById("prevMo").onclick=()=>{ const d=parseD(statMonth+"-01"); d.setMonth(d.getMonth()-1); statMonth=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); renderStats(); };
   document.getElementById("nextMo").onclick=()=>{ const d=parseD(statMonth+"-01"); d.setMonth(d.getMonth()+1); statMonth=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); renderStats(); };
 
-  /* ---------- 途中経過 (season progress) ---------- */
-  const SEASON_START="2026-05-20";
-  const SEASON_LABEL="2026年度";
+  /* ---------- 途中経過 (season progress) ----------
+     集計範囲＝実際に記録が入っている期間（最初の記録日〜最後の記録日）を自動判定 */
   function seasonStats(){
-    const ses=sessions.filter(s=>s.date>=SEASON_START).sort((a,b)=> a.date<b.date?-1:1);
+    const ses=[...sessions].sort((a,b)=> a.date<b.date?-1:1);
     const attend=ses.reduce((a,s)=>a+s.attendees.length,0);
     const treat=ses.reduce((a,s)=>a+(s.amount||0),0);
     const per=roster.map(m=>{
@@ -1196,8 +1268,12 @@
     return {ses:ses,attend:attend,treat:treat,per:per};
   }
   function seasonPeriodLabel(){
-    const s=parseD(SEASON_START), t=parseD(todayStr());
-    return SEASON_LABEL+"（"+(s.getMonth()+1)+"/"+s.getDate()+"〜"+(t.getMonth()+1)+"/"+t.getDate()+"）";
+    if(!sessions.length) return "まだ記録がありません";
+    const dates=sessions.map(s=>s.date).sort();
+    const s=parseD(dates[0]), t=parseD(dates[dates.length-1]);
+    const sy=s.getFullYear(), ty=t.getFullYear();
+    if(sy===ty) return sy+"年 "+(s.getMonth()+1)+"/"+s.getDate()+"〜"+(t.getMonth()+1)+"/"+t.getDate()+"（記録のある期間）";
+    return sy+"/"+(s.getMonth()+1)+"/"+s.getDate()+"〜"+ty+"/"+(t.getMonth()+1)+"/"+t.getDate()+"（記録のある期間）";
   }
   function renderProgress(){
     const st=seasonStats();
@@ -1211,7 +1287,7 @@
     // 男気ランキング（年度累計）
     const tl=document.getElementById("pgTreatList"); tl.innerHTML="";
     const treats=st.per.filter(x=>x.treat>0).sort((a,b)=>b.treat-a.treat);
-    if(treats.length===0){ tl.innerHTML="<div class='empty'>まだ男気の記録がありません<span class='dot'>。</span></div>"; }
+    if(treats.length===0){ tl.innerHTML="<div class='empty'>まだ男気の記録がありません / No treats yet<span class='dot'>。</span></div>"; }
     else{
       const max=treats[0].treat;
       treats.forEach((t,i)=>{
@@ -1228,7 +1304,7 @@
     const cl=document.getElementById("pgCrewList"); cl.innerHTML="";
     const newbies=st.per.filter(x=>x.att===1).length;
     document.getElementById("pgCrewCount").textContent="参加者名簿 "+st.per.length+"名（🆕 "+newbies+"名）";
-    if(st.per.length===0){ cl.innerHTML="<div class='empty'>まだ参加記録がありません<span class='dot'>。</span></div>"; }
+    if(st.per.length===0){ cl.innerHTML="<div class='empty'>まだ参加記録がありません / No records yet<span class='dot'>。</span></div>"; }
     else st.per.forEach(m=>{
       const el=document.createElement("div"); el.className="lb-item";
       el.innerHTML="<div class='lb-body'><div class='lb-name'>"+(m.att===1?"🆕 ":"")+esc(m.name)+"</div></div>"+
@@ -1258,7 +1334,7 @@
   }
   document.getElementById("pgSendBtn").onclick=function(){
     const btn=this;
-    if(!effWebhook()){ toast("Webhook未設定。設定タブを確認",'r'); return; }
+    if(!effWebhook()){ toast("Webhook未設定。設定タブを確認 / Set webhook in Config",'r'); return; }
     if(!confirm("途中経過まとめをDiscordに投稿しますか？")) return;
     btn.disabled=true;
     sendDiscord(buildProgressMessage())
@@ -1271,7 +1347,7 @@
   function renderCrew(){
     document.getElementById("crewCount").textContent=roster.length? roster.length+"名":"";
     const c=document.getElementById("crewList"); c.innerHTML="";
-    if(roster.length===0){ c.innerHTML="<div class='empty'>まだメンバーがいません。<br>上から追加するか、記録画面で「+新しい人」から登録<span class='dot'>。</span></div>"; return; }
+    if(roster.length===0){ c.innerHTML="<div class='empty'>まだメンバーがいません。<br>上から追加するか、記録画面で「+新しい人」から登録<span class='dot'>。</span><br>No members yet — add above, or via「+ New」on the Log tab.</div>"; return; }
     const list=roster.map(m=>({...m,att:attendCount(m.id),treat:treatTotal(m.id)}));
     list.sort((a,b)=> crewSort==="att"? b.att-a.att : b.treat-a.treat);
     const maxAtt=Math.max(1,...list.map(x=>x.att));
@@ -1325,6 +1401,10 @@
   document.getElementById("mvClose").onclick=closeMemberEdit;
   document.getElementById("memberOv").onclick=function(e){ if(e&&e.target===this) closeMemberEdit(); };
   document.getElementById("shareOv").onclick=function(e){ if(e&&e.target===this) this.classList.remove("show"); };
+  /* ---------- ❓ About ---------- */
+  document.getElementById("aboutBtn").onclick=()=>document.getElementById("aboutOv").classList.add("show");
+  document.getElementById("aboutClose").onclick=()=>document.getElementById("aboutOv").classList.remove("show");
+  document.getElementById("aboutOv").onclick=function(e){ if(e&&e.target===this) this.classList.remove("show"); };
   document.getElementById("mvRename").onclick=()=>{
     const m=roster.find(x=>x.id===editMemberId); if(!m){ closeMemberEdit(); return; }
     const nn=document.getElementById("mvNameInput").value;
@@ -1357,7 +1437,6 @@
     const names=rec.attendees.map(memberName);
     const lines=[];
     const site=rec.site||DEFAULT_SITE;
-    const EWD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
     lines.push("🌅 **朝活活動報告 | Morning Report**");
     // 場所はリンク形式：📍 Bangkok（Gmap：Here）
     let gm="";
@@ -1367,7 +1446,13 @@
       if(url) gm="（Gmap：["+(c.name||"Here")+"]("+url+")）";
       else if(c.name) gm="（"+c.name+"）";
     }
-    lines.push(d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate()+" ("+WD[d.getDay()]+"/"+EWD[d.getDay()]+") "+(rec.time||"05:30")+"｜📍 "+site+gm+(config.host?"｜主催 Host: "+config.host:""));
+    // 拠点ごとの国旗とタイムゾーン（未知の拠点は端末の現地時間から算出）
+    const SITE_TZ={"bangkok":["🇹🇭","GMT+7"],"danang":["🇻🇳","GMT+7"],"osaka":["🇯🇵","GMT+9"],"tokyo":["🇯🇵","GMT+9"],"pattaya":["🇹🇭","GMT+7"],"chiangmai":["🇹🇭","GMT+7"]};
+    const ti=SITE_TZ[normName(site)];
+    const off=-(new Date()).getTimezoneOffset()/60;
+    const tz=ti?ti[1]:("GMT"+(off>=0?"+":"")+off);
+    const flag=ti?" "+ti[0]:"";
+    lines.push(d.getDate()+"/"+EMON[d.getMonth()]+"/"+d.getFullYear()+" ("+WD[d.getDay()]+"/"+EWD[d.getDay()]+") "+(rec.time||"05:30")+" ("+tz+")｜📍 "+site+flag+gm+(config.host?"｜主催 Host: "+config.host:""));
     const ph=rec.phases||["run","hiit","ice"];
     const menu=MENU.filter(m=>ph.includes(m.k)).map(m=>m.e+" "+m.l);
     if(menu.length) lines.push("🔁 "+menu.join(" → "));
@@ -1375,26 +1460,89 @@
     lines.push("👥 参加 "+names.length+"名 | "+names.length+" joined");
     lines.push(names.join("・"));
     if(rec.winnerId){
-      const EMON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-      const sum=f=>sessions.filter(s=>s.winnerId && s.date<=rec.date && f(s)).reduce((a,s)=>a+(+s.amount||0),0);
-      const mTotal=sum(s=>s.date.slice(0,7)===rec.date.slice(0,7));
+      // トータルは「その日勝った人」の累計
+      const wname=memberName(rec.winnerId);
+      const sum=f=>sessions.filter(s=>s.winnerId===rec.winnerId && s.date<=rec.date && f(s)).reduce((a,s)=>a+(+s.amount||0),0);
       const yTotal=sum(s=>s.date.slice(0,4)===rec.date.slice(0,4));
       lines.push("");
-      lines.push("🥊 男気 Treat：🏆 **"+memberName(rec.winnerId)+"** "+yen(rec.amount));
-      lines.push("🏦 "+(d.getMonth()+1)+"月トータル | "+EMON[d.getMonth()]+" Total："+yen(mTotal));
-      lines.push("📊 "+d.getFullYear()+"年トータル | "+d.getFullYear()+" Total："+yen(yTotal));
+      lines.push("🥊 男気 Treat：🏆 **"+wname+"** "+yen(rec.amount));
+      // 勝者の当月成績：奢り回数・当月累計・GOCHI勝率（じゃんけんが行われた回のみカウント）
+      const mSess=sessions.filter(s=>s.date.slice(0,7)===rec.date.slice(0,7) && s.date<=rec.date);
+      const wins=mSess.filter(s=>s.winnerId===rec.winnerId);
+      const mTotal=wins.reduce((a,s)=>a+(+s.amount||0),0);
+      const played=mSess.filter(s=>s.winnerId && (s.jankenIds||[]).includes(rec.winnerId)).length;
+      lines.push("🏦 "+wname+" "+(d.getMonth()+1)+"月の奢り | "+EMON[d.getMonth()]+" Treats："+wins.length+"回 "+yen(mTotal));
+      if(played) lines.push("🎲 当月GOCHI勝率 | Win Rate："+wins.length+"勝/"+played+"戦（"+Math.round(wins.length/played*100)+"%）");
+      lines.push("📊 "+wname+" "+d.getFullYear()+"年トータル | "+d.getFullYear()+" Total："+yen(yTotal));
     }
     if(rec.note){ lines.push(""); lines.push("📝 "+rec.note); }
     lines.push("Run. Heat. Ice. Repeat. — Thcc."+(rec.recorder?"（✍️ "+rec.recorder+"）":""));
     return lines.join("\n");
   }
-  function sendDiscord(content){
+  function sendDiscord(content, files){
     const url=effWebhook();
     if(!url) return Promise.reject(new Error("no webhook"));
+    // Discordは1投稿2000文字まで。超えたら切り詰めて送信失敗を防ぐ
+    if(content.length>2000) content=content.slice(0,1997)+"…";
     const fd=new FormData();
     fd.append("payload_json", JSON.stringify({content:content, allowed_mentions:{parse:[]}}));
+    // 添付（写真・動画）はWebhookに直接送る＝アプリ側の容量を一切使わない
+    (files||[]).forEach((f,i)=>{ try{ fd.append("files["+i+"]", f, f._name||f.name||("file"+i)); }catch(e){} });
     return fetch(url,{method:"POST",body:fd}).then(r=>{ if(!r.ok) throw new Error("status "+r.status); });
   }
+
+  /* ---------- 📷 添付（写真・動画）— メモリのみ保持、保存はDiscord側 ---------- */
+  let attachFiles=[];
+  const ATT_MAX_FILES=10, ATT_MAX_TOTAL=9.5*1024*1024; // Discord無料枠 約10MB/投稿
+  function attTotal(){ return attachFiles.reduce((a,f)=>a+(f.size||0),0); }
+  function fmtMB(n){ return (n/1048576).toFixed(1)+"MB"; }
+  // 大きい写真はcanvasで長辺1920px・JPEG85%に軽量化（動画・GIFはそのまま）
+  function compressImage(file){
+    return new Promise(res=>{
+      if(!/^image\//.test(file.type) || file.type==="image/gif" || file.size<1200000) return res(file);
+      const u=URL.createObjectURL(file); const img=new Image();
+      img.onload=()=>{
+        const MAX=1920; let w=img.width,h=img.height;
+        if(Math.max(w,h)>MAX){ const r=MAX/Math.max(w,h); w=Math.round(w*r); h=Math.round(h*r); }
+        const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
+        cv.getContext("2d").drawImage(img,0,0,w,h);
+        cv.toBlob(b=>{ URL.revokeObjectURL(u); res(b && b.size<file.size ? b : file); },"image/jpeg",.85);
+      };
+      img.onerror=()=>{ URL.revokeObjectURL(u); res(file); };
+      img.src=u;
+    });
+  }
+  function renderAttach(){
+    const box=document.getElementById("attachThumbs"); if(!box) return;
+    box.innerHTML=""; box.style.display=attachFiles.length?"flex":"none";
+    attachFiles.forEach((f,i)=>{
+      const d=document.createElement("div");
+      d.style.cssText="position:relative;width:56px;height:56px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--panel);display:flex;align-items:center;justify-content:center;font-size:22px";
+      if(f._isVideo){ d.textContent="🎬"; }
+      else{ const im=document.createElement("img"); im.src=URL.createObjectURL(f); im.style.cssText="width:100%;height:100%;object-fit:cover"; d.appendChild(im); }
+      const x=document.createElement("div"); x.textContent="✕";
+      x.style.cssText="position:absolute;top:0;right:0;width:19px;height:19px;background:rgba(0,0,0,.7);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-bottom-left-radius:8px";
+      x.onclick=()=>{ attachFiles.splice(i,1); renderAttach(); };
+      d.appendChild(x); box.appendChild(d);
+    });
+    const btn=document.getElementById("sendTodayBtn");
+    if(btn) btn.innerHTML="<span>📣 Discordに送る / Post to Discord"+(attachFiles.length?"（📎"+attachFiles.length+"・"+fmtMB(attTotal())+"）":"")+"</span>";
+  }
+  document.getElementById("attachBtn").onclick=()=>document.getElementById("attachInput").click();
+  document.getElementById("attachInput").onchange=function(){
+    const list=Array.prototype.slice.call(this.files||[]); this.value="";
+    let p=Promise.resolve();
+    list.forEach(f=>{ p=p.then(()=>{
+      if(attachFiles.length>=ATT_MAX_FILES){ toast("添付は最大10点まで",'r'); return; }
+      return compressImage(f).then(g=>{
+        if(attTotal()+g.size>ATT_MAX_TOTAL){ toast("「"+(f.name||"ファイル")+"」("+fmtMB(g.size)+")は入りません。合計約10MBまで⚠️",'r'); return; }
+        g._name=/^image\//.test(f.type)&&g!==f ? (f.name||"photo").replace(/\.\w+$/,"")+".jpg" : (f.name||"file");
+        g._isVideo=/^video\//.test(f.type);
+        attachFiles.push(g);
+      });
+    });});
+    p.then(renderAttach);
+  };
 
   /* ---------- share image (Insta / Threads) ---------- */
   const JPFONT='"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif';
@@ -1411,14 +1559,14 @@
     const W=1080,H=1920;
     const cv=document.createElement("canvas"); cv.width=W; cv.height=H;
     const x=cv.getContext("2d");
-    const TEAL="#19e3c4",RED="#ff3a1f",WHT="#f4f6f7",MUT="#7b828c",LINE="#2a2f38";
+    const TEAL="#5ce1e6",RED="#ee3e23",WHT="#f4f6f7",MUT="#7b828c",LINE="#2a2f38"; // Thcc brand: OG Blue / Achi Red
     // bg + glows
     x.fillStyle="#0a0b0d"; x.fillRect(0,0,W,H);
     let g=x.createRadialGradient(W*.9,80,0,W*.9,80,820);
-    g.addColorStop(0,"rgba(25,227,196,.13)"); g.addColorStop(1,"rgba(25,227,196,0)");
+    g.addColorStop(0,"rgba(92,225,230,.13)"); g.addColorStop(1,"rgba(92,225,230,0)");
     x.fillStyle=g; x.fillRect(0,0,W,H);
     g=x.createRadialGradient(60,H*.8,0,60,H*.8,820);
-    g.addColorStop(0,"rgba(255,58,31,.12)"); g.addColorStop(1,"rgba(255,58,31,0)");
+    g.addColorStop(0,"rgba(238,62,35,.12)"); g.addColorStop(1,"rgba(238,62,35,0)");
     x.fillStyle=g; x.fillRect(0,0,W,H);
     // frame + teal corner ticks
     x.strokeStyle=LINE; x.lineWidth=2; x.strokeRect(42,42,W-84,H-84);
@@ -1492,7 +1640,7 @@
     // winner band
     if(rec.winnerId){
       const bh2=180, top=y-52;
-      x.fillStyle="rgba(255,58,31,.10)"; x.fillRect(44,top,W-88,bh2);
+      x.fillStyle="rgba(238,62,35,.10)"; x.fillRect(44,top,W-88,bh2);
       x.fillStyle=RED; x.fillRect(44,top,10,bh2);
       x.fillStyle=MUT; x.font="700 30px "+JPFONT; x.fillText("🥊 男気じゃんけん",cx,y);
       x.fillStyle=RED;
@@ -1654,7 +1802,7 @@
     for(let d=1;d<=dim;d++){
       const ds=y+"-"+String(mo+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
       const on=days.has(ds);
-      html+="<div style='padding:7px 0;border-radius:8px;"+(on?"background:rgba(61,214,181,.16);color:var(--teal);font-weight:800":"opacity:.4")+"'>"+d+"</div>";
+      html+="<div style='padding:7px 0;border-radius:8px;"+(on?"background:rgba(203,108,230,.18);color:var(--purple);font-weight:800":"opacity:.4")+"'>"+d+"</div>";
     }
     document.getElementById("meCal").innerHTML=html;
     // きょうのメモ（保存済みなら呼び出し）
@@ -1718,7 +1866,7 @@
   }
   function setCloudStatus(txt,ok){
     const el=document.getElementById("cloudStatus");
-    if(el){ el.textContent=txt; el.style.color=ok?"var(--teal)":"var(--red)"; }
+    if(el){ el.textContent=txt; el.style.color=ok?"var(--green)":"var(--red)"; }
   }
   function initCloud(){
     if(!FIREBASE_CONFIG){ setCloudStatus("未設定：データはこの端末だけに保存されます",false); return; }
