@@ -316,7 +316,7 @@
         <div style="height:18px"></div>
 
         <label class="fld">🔁 Menu / 今朝のメニュー</label>
-        <div class="flow">RUN<span class="a">/</span>WALK<span class="a">→</span>HIIT<span class="a">→</span>ICE<span class="a">→</span>REPEAT</div>
+        <div class="flow">WALK<span class="a">/</span>RUN<span class="a">→</span>HIIT<span class="a">→</span>ICE<span class="a">→</span>REPEAT</div>
         <div class="chips" id="menuChips"></div>
 
         <div style="height:18px"></div>
@@ -512,7 +512,7 @@
     </div>
   </section>
 
-  <footer>RHIR by Thcc<span class="dot">.</span> — Run. Heat. Ice. Repeat.<br><span style="opacity:.55">Asakatsu Earth v2.2.1 ☁️</span></footer>
+  <footer>RHIR by Thcc<span class="dot">.</span> — Run. Heat. Ice. Repeat.<br><span style="opacity:.55">Asakatsu Earth v2.3.1 ☁️</span></footer>
 </div>
 
 <nav>
@@ -619,14 +619,49 @@
   // 表記が違う同一人物は NAME_ALIASES に「まとめる側 → 残す側」で書く。
   function normName(s){ return (s||"").trim().toLowerCase().replace(/[\s\u3000]+/g,""); }
   const NAME_ALIASES={
-    // 例）"てつ":"Tetsu"
+    // 別表記の同一人物 →「残す側の名前」
+    "Toshi":"Toshi.Kura",
+    "Saki":"Kenji.Saki",
+    "Ryo OG":"Ryo.heatOG"
   };
+  // ---- 名前の統一（Tetsu.K形式）：旧表記 → 新表記。起動時に自動で改名され、全端末に同期される ----
+  const NAME_RENAMES={
+    "Tetsu":"Tetsu.ice",
+    "Kurasaka":"Toshi.Kura",
+    "Sato":"Ryo.heatOG",
+    "Nori":"Nori.tora",
+    "Kenji":"Kenji.Saki",
+    "Jitaro":"Jitaro.W",
+    "Shota":"Shota.K",
+    "Riko":"Riko.Saki",
+    "Gen":"Gen.T",
+    "Seiya":"Seiya.K",
+    "Umeda":"E.Umeda",
+    "Dean":"Dean.dm",
+    "Masa":"Masa.palm",
+    "Yamasaki":"K.Yamasaki",
+    "Shun":"Chun",
+    "Nakajima":"Nakashima",
+    "Su":"Su-san.S",
+    "Satou.yome":"Shoko.OG",
+    "Hiro":"Hiro.bradbury",
+    "Kentaro":"Kentaro.Y"
+  };
+  function runRenames(){
+    let hit=false;
+    roster.forEach(m=>{ const nn=NAME_RENAMES[m.name]; if(nn && m.name!==nn){ m.name=nn; touchM(m); hit=true; } });
+    if(hit) jsave(RKEY,roster);
+  }
   function runRosterMerge(){
     // どの端末で実行しても同じ結果になるよう、残す人を決定的に選ぶ
     //（正式表記の名前を優先 → 同点ならIDが小さい方）
     const groups={}, remap={};
+    // 旧表記・別表記は大文字小文字/空白の違いも吸収して正式名に寄せる
+    const CANON={};
+    Object.keys(NAME_RENAMES).forEach(k=>{ CANON[normName(k)]=NAME_RENAMES[k]; });
+    Object.keys(NAME_ALIASES).forEach(k=>{ CANON[normName(k)]=NAME_ALIASES[k]; });
     roster.forEach(m=>{
-      const key=normName(NAME_ALIASES[m.name]||m.name);
+      const key=normName(CANON[normName(m.name)]||m.name);
       (groups[key]=groups[key]||[]).push(m);
     });
     Object.keys(groups).forEach(key=>{
@@ -676,6 +711,8 @@
     if(localStorage.getItem(FIXKEY)) return;
     const F="2026-07-09T01:00:00.000Z"; // 固定タイムスタンプ：全端末で同一データに収束させる
     const NM={}; roster.forEach(m=>{ NM[normName(m.name)]=m.id; });
+    // 改名済みの名簿でも旧名で見つけられるようにする
+    Object.keys(NAME_RENAMES).forEach(o=>{ const t=NM[normName(NAME_RENAMES[o])]; if(t && !NM[normName(o)]) NM[normName(o)]=t; });
     function mid(name,jk){
       const k=normName(name);
       if(NM[k]) return NM[k];
@@ -703,6 +740,7 @@
     localStorage.setItem(FIXKEY,"1");
   }
   runRepair();
+  runRenames();
   runRosterMerge();
 
   const uid=()=> "m"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
@@ -715,7 +753,7 @@
   function memberName(id){ const m=roster.find(x=>x.id===id); return m?m.name:"（不明）"; }
   function effWebhook(){ return (config.webhook||"").trim() || BUILTIN_WEBHOOK; }
 
-  const MENU=[{k:"run",e:"🏃",l:"RUN"},{k:"walk",e:"🚶",l:"WALK"},{k:"hiit",e:"🔥",l:"HIIT"},{k:"ice",e:"🧊",l:"ICE"}];
+  const MENU=[{k:"walk",e:"🚶",l:"WALK"},{k:"run",e:"🏃",l:"RUN"},{k:"hiit",e:"🔥",l:"HIIT"},{k:"rope",e:"🪢",l:"ROPE"},{k:"bridge",e:"🌉",l:"BRIDGE"},{k:"hand",e:"🤸",l:"HANDSTAND"},{k:"bokuto",e:"⚔️",l:"BOKUTO"},{k:"ice",e:"🧊",l:"ICE"}]; // WALKはRUNの前、ICEは締め
 
   // ---- record-tab state ----
   let attArr=[];        // 参加者（来た人全員）
@@ -822,10 +860,39 @@
       c.appendChild(el);
     });
   }
+  // 「この人かも」候補さがし：①表記ゆれ（大文字小文字・空白） ②旧表記/別表記 ③名前の一部が一致
+  function findCandidates(name){
+    const n=normName(name); const out=[]; const seen={};
+    const push=m=>{ if(m && !seen[m.id]){ seen[m.id]=1; out.push(m); } };
+    roster.forEach(m=>{ if(normName(m.name)===n) push(m); });
+    const MAP=Object.assign({},NAME_RENAMES,NAME_ALIASES);
+    const rk=Object.keys(MAP).find(k=>normName(k)===n);
+    if(rk) push(roster.find(m=>normName(m.name)===normName(MAP[rk])));
+    if(n.length>=3) roster.forEach(m=>{ const mn=normName(m.name); if(mn!==n && (mn.includes(n)||n.includes(mn))) push(m); });
+    return out;
+  }
   function addMember(name, janken){
     name=(name||"").trim(); if(!name) return null;
-    let ex=roster.find(m=>m.name===name) || roster.find(m=>normName(m.name)===normName(name));
-    if(ex && ex.name!==name) toast("「"+ex.name+"」として登録済みなので、その人を選びました");
+    let ex=roster.find(m=>m.name===name); // 完全一致は本人確定
+    if(!ex){
+      // 似た人がいれば「この人ですか？」と確認。ちがえば新規登録できる
+      const cands=findCandidates(name).slice(0,3);
+      for(const c of cands){
+        if(confirm("もしかして「"+c.name+"」さんですか？\n\nOK：その人として記録\nキャンセル：ちがう（別の人）")){ ex=c; break; }
+      }
+      if(!ex && cands.length){
+        // 同名のままだと起動時の自動統合でまとまってしまうため、区別できる名前にしてもらう
+        const n=normName(name);
+        const MAP=Object.assign({},NAME_RENAMES,NAME_ALIASES);
+        const collide=roster.some(m=>normName(m.name)===n) || Object.keys(MAP).some(k=>normName(k)===n);
+        if(collide){
+          const nn=(prompt("同じ名前は自動で1人にまとまってしまいます。\n区別できる名前で登録してください（例："+name+".2）", name+".2")||"").trim();
+          if(!nn || normName(nn)===n){ toast("登録をやめました"); return null; }
+          return addMember(nn, janken);
+        }
+      }
+    }
+    if(ex && ex.name!==name) toast("「"+ex.name+"」として記録しました");
     if(ex){ if(janken!==undefined){ ex.janken=janken; touchM(ex); jsave(RKEY,roster); } return ex.id; }
     const id=uid(); roster.push({id,name,janken: janken!==false,updatedAt:new Date().toISOString()}); jsave(RKEY,roster);
     return id;
@@ -835,7 +902,7 @@
     const inp=document.getElementById("newMemberName");
     const jk=document.getElementById("newMemberJanken").checked;
     const id=addMember(inp.value, jk);
-    if(!id){ toast("名前を入力してください"); return; }
+    if(!id){ if(!(inp.value||"").trim()) toast("名前を入力してください"); return; }
     if(!attArr.includes(id)){ attArr.push(id); if(jk) jankenArr.push(id); }
     inp.value=""; document.getElementById("newMemberJanken").checked=true;
     document.getElementById("addMemberBox").style.display="none";
@@ -1232,9 +1299,15 @@
     });
   }
   document.getElementById("crewAddBtn").onclick=()=>{
-    const inp=document.getElementById("crewNewName"); const id=addMember(inp.value);
-    if(!id){ toast("名前を入力してください"); return; }
-    inp.value=""; renderCrew(); renderAtt(); toast("メンバーを追加🤝",'t');
+    const inp=document.getElementById("crewNewName"); const nameIn=(inp.value||"").trim();
+    const existed=nameIn && roster.some(m=>m.name===nameIn);
+    const id=addMember(inp.value);
+    if(!id){ if(!nameIn) toast("名前を入力してください"); return; }
+    inp.value=""; renderCrew(); renderAtt();
+    const m=roster.find(x=>x.id===id);
+    if(m && m.name!==nameIn){ toast("「"+m.name+"」として記録しました"); }
+    else if(existed){ toast("「"+nameIn+"」はすでに登録されています"); }
+    else{ toast("メンバーを追加🤝",'t'); }
   };
   document.getElementById("sortAtt").onclick=function(){ crewSort="att"; this.classList.add("on"); document.getElementById("sortTreat").classList.remove("on"); renderCrew(); };
   document.getElementById("sortTreat").onclick=function(){ crewSort="treat"; this.classList.add("on"); document.getElementById("sortAtt").classList.remove("on"); renderCrew(); };
@@ -1284,29 +1357,35 @@
     const names=rec.attendees.map(memberName);
     const lines=[];
     const site=rec.site||DEFAULT_SITE;
-    lines.push("🌅 **朝活地球 RHIR** "+d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate()+" ("+WD[d.getDay()]+") "+(rec.time||"05:30")+" START｜📍 "+site);
-    const nth=sessions.filter(s=>(s.site||DEFAULT_SITE)===site&&s.date.slice(0,7)===rec.date.slice(0,7)&&s.date<=rec.date).length;
-    lines.push("🔥 連続"+streakAt(rec.date,site)+"日目｜"+(d.getMonth()+1)+"月 "+nth+"回目"+(config.host?"｜主催 "+config.host:""));
-    const menu=(rec.phases||["run","hiit","ice"]).map(k=>{const x=MENU.find(m=>m.k===k);return x?x.e+" "+x.l:"";}).filter(Boolean);
-    if(menu.length) lines.push("🔁 "+menu.join(" → ")+" → REPEAT");
-    lines.push("");
-    lines.push("👥 参加 "+names.length+"名");
-    lines.push("・"+names.join("　・"));
-    if(rec.winnerId){
-      const mTreat=treatTotal(rec.winnerId,rec.date.slice(0,7));
-      const jn=(rec.jankenIds||[]).length;
-      lines.push("");
-      lines.push("🥊 男気じゃんけん"+(jn?" "+jn+"名":"")+" → 🏆 **"+memberName(rec.winnerId)+"** が "+yen(rec.amount)+" 奢り！");
-      lines.push("（"+(d.getMonth()+1)+"月トータル "+memberName(rec.winnerId)+"："+yen(mTreat)+"）");
-    }
+    const EWD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    lines.push("🌅 **朝活活動報告 | Morning Report**");
+    // 場所はリンク形式：📍 Bangkok（Gmap：Here）
+    let gm="";
     if(rec.checkin){
       const c=rec.checkin;
       const url=c.url || (c.lat!=null ? "https://maps.google.com/?q="+c.lat+","+c.lng : null);
-      if(url) lines.push("📍 "+(c.name? c.name+" ":"")+url);
-      else if(c.name) lines.push("📍 "+c.name);
+      if(url) gm="（Gmap：["+(c.name||"Here")+"]("+url+")）";
+      else if(c.name) gm="（"+c.name+"）";
+    }
+    lines.push(d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate()+" ("+WD[d.getDay()]+"/"+EWD[d.getDay()]+") "+(rec.time||"05:30")+"｜📍 "+site+gm+(config.host?"｜主催 Host: "+config.host:""));
+    const ph=rec.phases||["run","hiit","ice"];
+    const menu=MENU.filter(m=>ph.includes(m.k)).map(m=>m.e+" "+m.l);
+    if(menu.length) lines.push("🔁 "+menu.join(" → "));
+    lines.push("");
+    lines.push("👥 参加 "+names.length+"名 | "+names.length+" joined");
+    lines.push(names.join("・"));
+    if(rec.winnerId){
+      const EMON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      const sum=f=>sessions.filter(s=>s.winnerId && s.date<=rec.date && f(s)).reduce((a,s)=>a+(+s.amount||0),0);
+      const mTotal=sum(s=>s.date.slice(0,7)===rec.date.slice(0,7));
+      const yTotal=sum(s=>s.date.slice(0,4)===rec.date.slice(0,4));
+      lines.push("");
+      lines.push("🥊 男気 Treat：🏆 **"+memberName(rec.winnerId)+"** "+yen(rec.amount));
+      lines.push("🏦 "+(d.getMonth()+1)+"月トータル | "+EMON[d.getMonth()]+" Total："+yen(mTotal));
+      lines.push("📊 "+d.getFullYear()+"年トータル | "+d.getFullYear()+" Total："+yen(yTotal));
     }
     if(rec.note){ lines.push(""); lines.push("📝 "+rec.note); }
-    lines.push("— Thcc."+(rec.recorder?"（✍️ "+rec.recorder+"）":""));
+    lines.push("Run. Heat. Ice. Repeat. — Thcc."+(rec.recorder?"（✍️ "+rec.recorder+"）":""));
     return lines.join("\n");
   }
   function sendDiscord(content){
