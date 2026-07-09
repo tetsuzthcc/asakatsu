@@ -482,12 +482,9 @@
     </div>
 
     <div class="card">
-      <div class="sec-h"><span class="bar r"></span><span class="t">Discord</span><span class="jp">自動投稿</span></div>
-      <div class="switch-row">
-        <div><div class="lbl">記録したら自動投稿</div><div class="sub">記録ボタンで即チャンネルへ</div></div>
-        <label class="sw"><input type="checkbox" id="cfgAuto"><span class="track"><span class="knob"></span></span></label>
-      </div>
-      <label class="fld" style="margin-top:14px">Webhook URL</label>
+      <div class="sec-h"><span class="bar r"></span><span class="t">Discord</span><span class="jp">投稿設定</span></div>
+      <div class="mini" style="margin-bottom:10px">投稿は記録後の 📣 ボタンから。二重投稿を防ぐため、自動投稿は廃止しました。</div>
+      <label class="fld" style="margin-top:4px">Webhook URL</label>
       <input type="text" id="cfgWebhook" placeholder="https://discord.com/api/webhooks/...">
       <div class="hint" style="margin-top:8px">Discordのチャンネル設定 → 連携サービス → ウェブフックを作成 → URLをコピー。<br><span class="accent-t">共有のコツ：</span>後でこのファイルをネットに置くなら、コード先頭の <b>BUILTIN_WEBHOOK</b> に貼れば、URLを配るだけで全員が同じチャンネルに投稿できます（各自設定不要）。</div>
       <button class="cta ghost" id="testDiscord" style="margin-top:12px;font-size:16px"><span>テスト送信</span></button>
@@ -515,7 +512,7 @@
     </div>
   </section>
 
-  <footer>RHIR by Thcc<span class="dot">.</span> — Run. Heat. Ice. Repeat.<br><span style="opacity:.55">Asakatsu Earth v2.2 ☁️</span></footer>
+  <footer>RHIR by Thcc<span class="dot">.</span> — Run. Heat. Ice. Repeat.<br><span style="opacity:.55">Asakatsu Earth v2.2.1 ☁️</span></footer>
 </div>
 
 <nav>
@@ -617,6 +614,53 @@
   const MEKEY="thcc_me_v1", MKEY="thcc_memos_v1";
   let memos = jload(MKEY, []);               // [{id:member@date, member, date, mood, text, savedAt}]
 
+  // ---- 名簿の重複統合 ----
+  // 同じ人が別々に登録されてしまった分を、起動時に自動でまとめる（全端末に同期される）。
+  // 表記が違う同一人物は NAME_ALIASES に「まとめる側 → 残す側」で書く。
+  function normName(s){ return (s||"").trim().toLowerCase().replace(/[\s\u3000]+/g,""); }
+  const NAME_ALIASES={
+    // 例）"てつ":"Tetsu"
+  };
+  function runRosterMerge(){
+    // どの端末で実行しても同じ結果になるよう、残す人を決定的に選ぶ
+    //（正式表記の名前を優先 → 同点ならIDが小さい方）
+    const groups={}, remap={};
+    roster.forEach(m=>{
+      const key=normName(NAME_ALIASES[m.name]||m.name);
+      (groups[key]=groups[key]||[]).push(m);
+    });
+    Object.keys(groups).forEach(key=>{
+      const g=groups[key];
+      if(g.length<2) return;
+      g.sort((a,b)=> ((normName(b.name)===key)?1:0)-((normName(a.name)===key)?1:0) || (a.id<b.id?-1:1));
+      const keeper=g[0];
+      // ♀/子マーク（じゃんけん除外）は、どれか1つに付いていれば引き継ぐ
+      if(g.some(m=>m.janken===false) && keeper.janken!==false){ keeper.janken=false; touchM(keeper); }
+      g.slice(1).forEach(m=>{ remap[m.id]=keeper.id; });
+    });
+    const dupIds=Object.keys(remap);
+    if(!dupIds.length) return;
+    const now=new Date().toISOString();
+    sessions.forEach(s=>{
+      const a=s.attendees||[], j=s.jankenIds||[];
+      if(!a.some(id=>remap[id]) && !j.some(id=>remap[id]) && !remap[s.winnerId]) return;
+      s.attendees=[...new Set(a.map(id=>remap[id]||id))];
+      s.jankenIds=[...new Set(j.map(id=>remap[id]||id))];
+      if(remap[s.winnerId]) s.winnerId=remap[s.winnerId];
+      s.savedAt=now; // 新しい方が勝つ同期なので、統合結果を全端末に行き渡らせる
+    });
+    memos.forEach(mm=>{
+      if(remap[mm.member]){ mm.member=remap[mm.member]; mm.id=mm.member+"@"+mm.date; mm.savedAt=now; }
+    });
+    memos.sort((a,b)=> (a.savedAt||"")<(b.savedAt||"")?1:-1);
+    const seen={}; memos=memos.filter(mm=>{ if(seen[mm.id]) return false; seen[mm.id]=1; return true; });
+    const meCur=localStorage.getItem(MEKEY);
+    if(meCur && remap[meCur]) localStorage.setItem(MEKEY, remap[meCur]);
+    dupIds.forEach(id=>tombMember(id));
+    roster=roster.filter(m=>!remap[m.id]);
+    jsave(RKEY,roster); jsave(TKEY,sessions); jsave(MKEY,memos);
+  }
+
   // ---- 拠点・入力者 ----
   const SITEKEY="thcc_site_v1", RECRKEY="thcc_recorder_v1", DEFAULT_SITE="Bangkok";
   function normSessions(arr){ (arr||[]).forEach(s=>{ if(!s.site) s.site=DEFAULT_SITE; if(s.recorder==null) s.recorder=""; }); return arr; }
@@ -625,6 +669,41 @@
   function findRec(date,site){ return sessions.find(s=>s.date===date && (s.site||DEFAULT_SITE)===site); }
   function curSite(){ const el=document.getElementById("sesSite"); const v=el&&el.value.trim(); return v || localStorage.getItem(SITEKEY) || DEFAULT_SITE; }
   function curRecorder(){ const el=document.getElementById("sesRecorder"); const v=el&&el.value.trim(); return v || localStorage.getItem(RECRKEY) || ""; }
+
+  // ---- 7/1〜7/4 復旧データ（v2.0の同期事故で消えた分をDiscord投稿から復元・1回だけ注入） ----
+  const FIXKEY="thcc_fix_202607_v1";
+  function runRepair(){
+    if(localStorage.getItem(FIXKEY)) return;
+    const F="2026-07-09T01:00:00.000Z"; // 固定タイムスタンプ：全端末で同一データに収束させる
+    const NM={}; roster.forEach(m=>{ NM[normName(m.name)]=m.id; });
+    function mid(name,jk){
+      const k=normName(name);
+      if(NM[k]) return NM[k];
+      const id="fix_"+k; NM[k]=id;
+      roster.push({id, name, janken:(jk!==false), updatedAt:F});
+      return id;
+    }
+    const R=[
+      {date:"2026-07-01",att:["Tetsu","Sato","Nori","Kenji","Shota"],jk:["Tetsu","Sato","Nori","Kenji","Shota"],win:"Shota",amt:500,note:"忘備",lat:13.71944,lng:100.60405},
+      {date:"2026-07-02",att:["Jitaro","Kurasaka","Tetsu","Sato"],jk:["Jitaro","Kurasaka","Tetsu","Sato"],win:"Sato",amt:360,note:"Bottomless 🌀 Buy 3 get 1 free",lat:13.71932,lng:100.60411},
+      {date:"2026-07-03",att:["Tetsu","Gen","Kenji","Seiya","Kentaro","Riko","Sato","Kurasaka"],jk:["Tetsu","Gen","Kenji","Seiya","Kentaro","Sato","Kurasaka"],win:"Sato",amt:820,note:"Karo",lat:13.71923,lng:100.60414},
+      {date:"2026-07-04",att:["Tetsu","Hideki","Fern","Yoshi","Kurasaka","Nori","Su","Gen","Seiya"],jk:["Tetsu","Hideki","Kurasaka","Nori","Su","Gen","Seiya"],win:"Tetsu",amt:900,note:"KARO スコールギリギリ耐えてる",lat:13.71923,lng:100.60417}
+    ];
+    R.forEach(r=>{
+      const rec={date:r.date,time:"05:30",site:"Bangkok",recorder:"",
+        attendees:r.att.map(n=>mid(n, n!=="Fern"&&n!=="Yoshi")),
+        jankenIds:r.jk.map(n=>mid(n)),
+        winnerId:mid(r.win), amount:r.amt,
+        phases:["run","hiit","ice"], note:r.note,
+        checkin:{lat:r.lat,lng:r.lng}, savedAt:F};
+      if(!sessions.some(s=>skey(s)===skey(rec))) sessions.push(rec);
+    });
+    sessions.sort((a,b)=>b.date.localeCompare(a.date));
+    jsave(RKEY,roster); jsave(TKEY,sessions);
+    localStorage.setItem(FIXKEY,"1");
+  }
+  runRepair();
+  runRosterMerge();
 
   const uid=()=> "m"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
   const WD=["日","月","火","水","木","金","土"];
@@ -745,7 +824,8 @@
   }
   function addMember(name, janken){
     name=(name||"").trim(); if(!name) return null;
-    let ex=roster.find(m=>m.name===name);
+    let ex=roster.find(m=>m.name===name) || roster.find(m=>normName(m.name)===normName(name));
+    if(ex && ex.name!==name) toast("「"+ex.name+"」として登録済みなので、その人を選びました");
     if(ex){ if(janken!==undefined){ ex.janken=janken; touchM(ex); jsave(RKEY,roster); } return ex.id; }
     const id=uid(); roster.push({id,name,janken: janken!==false,updatedAt:new Date().toISOString()}); jsave(RKEY,roster);
     return id;
@@ -856,9 +936,6 @@
     sessions.sort((a,b)=>b.date.localeCompare(a.date));
     jsave(TKEY,sessions);
 
-    if(config.auto && effWebhook()){
-      sendDiscord(buildMessage(rec)).then(()=>toast("Discordに投稿📣",'t')).catch(()=>toast("投稿失敗⚠️ 設定を確認",'r'));
-    }
     freeEntry=false;
     resetForm();
     refreshAll();
@@ -1405,12 +1482,10 @@
   function applyConfig(){
     document.getElementById("cfgHost").value=config.host||"";
     document.getElementById("cfgWebhook").value=config.webhook||"";
-    document.getElementById("cfgAuto").checked=!!config.auto;
   }
   document.getElementById("saveConfig").onclick=()=>{
     config.host=document.getElementById("cfgHost").value.trim();
     config.webhook=document.getElementById("cfgWebhook").value.trim();
-    config.auto=document.getElementById("cfgAuto").checked;
     jsave(CKEY,config); refreshAll(); toast("設定を保存しました⚙︎",'t');
   };
   document.getElementById("testDiscord").onclick=()=>{
