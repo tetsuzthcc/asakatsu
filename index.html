@@ -190,18 +190,18 @@
   #meMoodRow button{font-size:22px;padding:6px 0;line-height:1.3}
 
   /* history */
-  .hist{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}
+  .hist{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
   .hist:last-child{border-bottom:none}
-  .hist-date{width:46px;flex-shrink:0;text-align:center}
-  .hist-date .d{font-family:"Anton",Impact,sans-serif;transform:skewX(-8deg);font-size:22px;color:var(--teal)}
+  .hist-date{width:40px;flex-shrink:0;text-align:center}
+  .hist-date .d{font-family:"Anton",Impact,sans-serif;transform:skewX(-8deg);font-size:18px;color:var(--teal)}
   .hist-date .m{font-size:9px;color:var(--muted)}
   .hist-body{flex:1;min-width:0}
-  .hist-top{font-size:13px;font-weight:800}
-  .hist-att{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5}
-  .hist-treat{font-size:12px;margin-top:4px}
+  .hist-top{font-size:12.5px;font-weight:800}
+  .hist-att{font-size:11.5px;color:var(--muted);margin-top:1px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hist-treat{font-size:11.5px;margin-top:2px}
   .hist-treat .who{color:var(--red);font-weight:800}
-  .hist-acts{display:flex;flex-direction:column;gap:5px;align-self:flex-start}
-  .hist-acts button{background:none;border:none;cursor:pointer;font-size:13px;padding:2px 4px;color:var(--muted2)}
+  .hist-acts{display:grid;grid-template-columns:auto auto;gap:3px 10px;align-self:center;flex-shrink:0}
+  .hist-acts button{background:none;border:none;cursor:pointer;font-size:14px;padding:2px 4px;color:var(--muted2)}
   .hist-acts .e{color:var(--teal)}
 
   .empty{text-align:center;color:var(--muted2);font-size:13px;padding:26px 0;line-height:1.7}
@@ -386,7 +386,12 @@
         <div class="chips" id="postOptChips"></div>
       </div>
       <button class="cta" id="sendTodayBtn" style="margin-bottom:10px"><span>📣 Discordに送る / Post to Discord</span></button>
-      <button class="cta" id="shareTodayBtn"><span>📸 シェア画像を作る / Share image</span></button>
+      <button class="cta" id="shareTodayBtn" style="margin-bottom:10px"><span>📸 シェア画像を作る / Share image</span></button>
+      <div class="row2">
+        <button class="quick-btn" id="xPostBtn">𝕏 Xでポスト</button>
+        <button class="quick-btn" id="threadsPostBtn">🧵 Threadsでポスト</button>
+      </div>
+      <div class="hint" style="margin-top:6px">投稿画面が本文入りで開きます。画像は📸で作って添付を / Opens compose with text prefilled</div>
     </div>
 
     <!-- 最近の記録（修正・投稿の入口）-->
@@ -485,7 +490,7 @@
         <div id="meMonthly"></div>
       </div>
       <div class="card">
-        <div class="sec-h"><span class="bar r"></span><span class="t">Diary</span><span class="jp">これまでのメモ</span></div>
+        <div class="sec-h"><span class="bar r"></span><span class="t">Diary</span><span class="jp">運動日記 — 参加＋一言メモ</span></div>
         <div id="meDiary"></div>
       </div>
     </div>
@@ -555,8 +560,10 @@
     </div>
   </section>
 
-  <footer>RHIR by Thcc<span class="dot">.</span> — Run. Heat. Ice. Repeat.<br><span style="opacity:.55">Asakatsu Earth v3.2 Final 🌏</span></footer>
+  <footer>RHIR by Thcc<span class="dot">.</span> — Run. Heat. Ice. Repeat.<br><span style="opacity:.55">Asakatsu Earth v3.6 Final 🌏</span></footer>
 </div>
+
+<div id="updBar" style="display:none;position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:99;background:var(--teal);color:#06232a;font-weight:800;padding:12px 14px;border-radius:12px;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.5);cursor:pointer"></div>
 
 <nav>
   <button data-tab="log" class="on"><span class="ic">🔥</span><span class="nl">記録</span><span class="nl2">Log</span></button>
@@ -1321,10 +1328,10 @@
   function renderHistory(){
     fillHistList(document.getElementById("histList"), sessions.filter(s=>s.date.startsWith(statMonth)), "この月の記録はまだありません / No records this month");
   }
-  // 記録タブの「最近の記録」（直近5件）— 修正・投稿の入口
+  // 記録タブの「最近の記録」（直近10件）— 修正・投稿の入口
   function renderRecent(){
     const c=document.getElementById("recentList"); if(!c) return;
-    fillHistList(c, sessions.slice(0,5), "まだ記録がありません / No records yet");
+    fillHistList(c, sessions.slice(0,10), "まだ記録がありません / No records yet");
   }
   function fillHistList(c, ses, emptyMsg){
     c.innerHTML="";
@@ -1570,57 +1577,8 @@
   };
 
   /* ---------- Discord ---------- */
-  function buildMessage(rec){
-    const d=parseD(rec.date);
-    const names=rec.attendees.map(memberName);
-    const lines=[];
-    const site=rec.site||DEFAULT_SITE;
-    lines.push("🌅 **朝活活動報告 | Morning Report**");
-    // 場所はリンク形式：📍 Bangkok（Gmap：Here）
-    let gm="";
-    if(rec.checkin){
-      const c=rec.checkin;
-      const url=c.url || (c.lat!=null ? "https://maps.google.com/?q="+c.lat+","+c.lng : null);
-      if(url) gm="（Gmap：["+(c.name||"Here")+"]("+url+")）";
-      else if(c.name) gm="（"+c.name+"）";
-    }
-    // 拠点ごとの国旗とタイムゾーン（未知の拠点は端末の現地時間から算出）
-    const SITE_TZ={"bangkok":["🇹🇭","GMT+7"],"danang":["🇻🇳","GMT+7"],"osaka":["🇯🇵","GMT+9"],"tokyo":["🇯🇵","GMT+9"],"pattaya":["🇹🇭","GMT+7"],"chiangmai":["🇹🇭","GMT+7"]};
-    const ti=SITE_TZ[normName(site)];
-    const off=-(new Date()).getTimezoneOffset()/60;
-    const tz=ti?ti[1]:("GMT"+(off>=0?"+":"")+off);
-    const flag=ti?" "+ti[0]:"";
-    const spotTxt=rec.spot? "・"+rec.spot : "";
-    lines.push(d.getDate()+"/"+EMON[d.getMonth()]+"/"+d.getFullYear()+" ("+WD[d.getDay()]+"/"+EWD[d.getDay()]+") "+(rec.time||"05:30")+" ("+tz+")｜📍 "+site+spotTxt+flag+gm+(config.host?"｜主催 Host: "+config.host:""));
-    const ph=rec.phases||["run","hiit","ice"];
-    const menu=MENU.filter(m=>ph.includes(m.k)).map(m=>m.e+" "+m.l);
-    if(menu.length) lines.push("🔁 "+menu.join(" → "));
-    lines.push("");
-    if(names.length===1){
-      // ソロ朝活：一人でも積み上げてる。専用のリスペクト出力
-      lines.push("👤 **ソロ朝活 | SOLO SESSION**");
-      lines.push("🔥 **"+names[0]+"** — 一人でも積み上げる。今日も地球の朝活は途切れなかった 🌏");
-      lines.push("Showed up alone & kept the streak alive. Respect. 💪");
-    }else{
-      lines.push("👥 参加 "+names.length+"名 | "+names.length+" joined");
-      lines.push(names.join("・"));
-    }
-    if(rec.winnerId && config.postGochi!==false){
-      const wname=memberName(rec.winnerId);
-      lines.push("");
-      lines.push("🥊 男気 Treat：🏆 **"+wname+"** "+yen(rec.amount));
-      // 勝者の当月成績：奢り回数・当月累計・GOCHI勝率（じゃんけんが行われた回のみカウント）
-      const mSess=sessions.filter(s=>s.date.slice(0,7)===rec.date.slice(0,7) && s.date<=rec.date);
-      const wins=mSess.filter(s=>s.winnerId===rec.winnerId);
-      const mTotal=wins.reduce((a,s)=>a+(+s.amount||0),0);
-      const played=mSess.filter(s=>s.winnerId && (s.jankenIds||[]).includes(rec.winnerId)).length;
-      if(config.postMonthly!==false) lines.push("🏦 "+wname+" "+(d.getMonth()+1)+"月の奢り | "+EMON[d.getMonth()]+" Treats："+wins.length+"回 "+yen(mTotal));
-      if(played && config.postRate!==false) lines.push("🎲 当月GOCHI勝率 | Win Rate："+wins.length+"勝/"+played+"戦（"+Math.round(wins.length/played*100)+"%）");
-    }
-    if(rec.note){ lines.push(""); lines.push("📝 "+rec.note); }
-    lines.push("Run. Heat. Ice. Repeat. — Thcc."+(rec.recorder?"（✍️ "+rec.recorder+"）":""));
-    return lines.join("\n");
-  }
+  // v3.6: Discordも短い報告文に統一（SNS短文＋名前＋男気＋メモ）
+  function buildMessage(rec){ return buildShortMessage(rec, true); }
   function sendDiscord(content, files){
     const url=effWebhook();
     if(!url) return Promise.reject(new Error("no webhook"));
@@ -1891,6 +1849,34 @@
     presentShare(drawMeCard(me,st), "me_"+todayStr());
   };
   document.getElementById("shareTodayBtn").onclick=()=>openShare(todayStr());
+  /* ---------- X / Threads へ投稿 (v3.6) ----------
+     APIキー不要の公式「投稿画面を開く」リンクを使う。
+     本文入りの投稿画面が開くので、あとはポストを押すだけ。
+     Xは日本語約140字制限があるためSNS用の短い報告文を自動生成。 */
+  function buildShortMessage(rec, discord){
+    const d=parseD(rec.date);
+    const site=rec.site||DEFAULT_SITE;
+    const names=(rec.attendees||[]).map(memberName);
+    const ph=(rec.phases||[]).map(k=>{const x=MENU.find(m=>m.k===k);return x?x.e:"";}).join("");
+    let t="🌅 朝活地球 | Asakatsu Earth\n"
+      +(d.getMonth()+1)+"/"+d.getDate()+"("+WD[d.getDay()]+") "+(rec.time||"05:30")+"｜📍"+site+(rec.spot?"・"+rec.spot:"")+"\n"
+      +ph+" 参加 "+names.length+"名";
+    const withNames=t+"\n"+names.join("・");
+    if(discord || withNames.length<=110) t=withNames; // X用は大人数のとき名前を省略して字数制限に収める
+    if(discord){
+      if(rec.winnerId && config.postGochi!==false) t+="\n🥊 男気 Treat：🏆 "+memberName(rec.winnerId)+" "+yen(rec.amount);
+      if(rec.note) t+="\n📝 "+rec.note;
+      return t;
+    }
+    return t+"\n#朝活 #朝活地球 #Thcc";
+  }
+  function openSNS(base){
+    const rec=findRec(todayStr(),curSite()) || sessions.find(s=>s.date===todayStr());
+    if(!rec){ toast("今日の記録がありません",'r'); return; }
+    try{ window.open(base+encodeURIComponent(buildShortMessage(rec)),"_blank"); }catch(e){ toast("開けませんでした",'r'); }
+  }
+  document.getElementById("xPostBtn").onclick=()=>openSNS("https://x.com/intent/post?text=");
+  document.getElementById("threadsPostBtn").onclick=()=>openSNS("https://www.threads.net/intent/post?text=");
   document.getElementById("shareCloseBtn").onclick=()=>document.getElementById("shareOv").classList.remove("show");
   document.getElementById("shareDlBtn").onclick=()=>{
     if(!shareBlob) return;
@@ -2054,11 +2040,23 @@
     const mt=document.getElementById("meMemoText");
     if(todayMemo && !mt.value && !meMood){ meMood=todayMemo.mood||null; mt.value=todayMemo.text||""; } // 入力途中は同期で上書きしない
     renderMoodRow();
-    // メモ履歴
-    const mineMemos=memos.filter(x=>x.member===cur).sort((a,b)=>a.date<b.date?1:-1).slice(0,14);
-    document.getElementById("meDiary").innerHTML = mineMemos.length?
-      mineMemos.map(x=>"<div class='mini' style='padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06)'>"+esc(x.date)+"　"+esc(x.mood||"")+" "+esc(x.text||"")+"</div>").join("")
-      : "<div class='mini'>まだメモがありません。今日のきぶんから始めましょう。</div>";
+    // 運動日記：参加記録と一言メモを日付ごとに合体（新しい順・直近20日分）
+    const byDate={};
+    mine.forEach(s=>{ (byDate[s.date]=byDate[s.date]||{ses:[],memo:null}).ses.push(s); });
+    memos.filter(x=>x.member===cur).forEach(x=>{ (byDate[x.date]=byDate[x.date]||{ses:[],memo:null}).memo=x; });
+    const dks=Object.keys(byDate).sort().reverse().slice(0,20);
+    document.getElementById("meDiary").innerHTML = dks.length?
+      dks.map(k=>{
+        const e=byDate[k]; const dd2=parseD(k);
+        const where=e.ses.map(s=>esc(s.site||DEFAULT_SITE)+(s.spot?"・"+esc(s.spot):"")).join(" / ");
+        const ph2=e.ses.length? (e.ses[0].phases||[]).map(p=>{const x=MENU.find(m=>m.k===p);return x?x.e:"";}).join("") : "";
+        return "<div class='mini' style='padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06);line-height:1.55'>"+
+          "<span style='color:var(--teal);font-weight:800'>"+(dd2.getMonth()+1)+"/"+dd2.getDate()+"("+WD[dd2.getDay()]+")</span>　"+
+          (where? "📍"+where+"　"+ph2 : "<span style='opacity:.5'>参加記録なし</span>")+
+          (e.memo? "<br>"+esc(e.memo.mood||"")+" "+esc(e.memo.text||"") : "")+
+          "</div>";
+      }).join("")
+      : "<div class='mini'>まだ記録がありません。今日のきぶんから始めましょう。</div>";
   }
   document.getElementById("meCalPrev").onclick=()=>meCalShift(-1);
   document.getElementById("meCalNext").onclick=()=>meCalShift(1);
@@ -2236,6 +2234,43 @@
 
   // PWA: サービスワーカー登録（ホーム画面追加でアプリとして動く・オフライン表示可）
   try{ if(navigator.serviceWorker&&navigator.serviceWorker.register) navigator.serviceWorker.register("sw.js").catch(function(){}); }catch(e){}
+
+  /* ---------- 自動更新チェック (v3.3) ----------
+     ホーム画面アプリは一度開くと古い画面がメモリに残り続けるので、
+     アプリが前面に戻ってくるたびに最新バージョンを確認。
+     新しい版があれば：入力途中でなければそのまま自動リロード、
+     入力途中なら壊さないように「タップで更新」バナーを出す。 */
+  const APP_VER="3.6";
+  let lastVerCheck=Date.now(); // 起動直後は最新なのでスキップ
+  function isTyping(){
+    try{
+      return !!editingDate || attArr.length>0 ||
+        document.getElementById("sesNote").value!=="" ||
+        document.getElementById("sesSpot").value!=="" ||
+        document.getElementById("meMemoText").value!=="";
+    }catch(e){ return true; } // 判定できないときは安全側（勝手にリロードしない）
+  }
+  function doReload(){ try{ window.location.reload(); }catch(e){ try{ location.reload(); }catch(e2){} } }
+  function checkUpdate(){
+    const now=Date.now();
+    if(now-lastVerCheck<5*60*1000) return; // チェックは5分に1回まで
+    lastVerCheck=now;
+    try{
+      fetch("index.html?upd="+now,{cache:"no-store"}).then(r=>r&&r.ok?r.text():null).then(function(html){
+        if(!html) return;
+        const m=html.match(/Asakatsu Earth v([\d.]+)/);
+        if(!m || m[1]===APP_VER) return;
+        if(!isTyping()){ doReload(); return; }
+        const b=document.getElementById("updBar");
+        if(b){ b.textContent="⬆️ 新しいバージョン v"+m[1]+" が届いています。タップで更新 / Tap to update"; b.style.display="block"; }
+      }).catch(function(){});
+    }catch(e){}
+  }
+  document.getElementById("updBar").onclick=doReload;
+  try{
+    if(document.addEventListener) document.addEventListener("visibilitychange",function(){ if(document.visibilityState==="visible") checkUpdate(); });
+    if(window.addEventListener) window.addEventListener("pageshow",function(ev){ if(ev&&ev.persisted) checkUpdate(); });
+  }catch(e){}
 })();
 </script>
 </body>
